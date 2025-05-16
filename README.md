@@ -56,9 +56,7 @@ using [Nauty](https://pallini.di.uniroma1.it/)
 with [nauty-laman-plugin](https://github.com/martinkjlarsson/nauty-laman-plugin).
 
 We swiftly describe the folder contents:
-- `./nauty/minimally_rigid_all` - holds all the minimally rigid graphs with the given number of vertices (up to 12 vertices).
-- `./nauty/minimally_rigid_some` - holds first 128 minimally rigid graphs generated using Nauty for the given size.
-- `./nauty/minimally_rigid_deg_3` - holds first 128 minimally rigid graphs generated using Nauty that have minimum degree of 3.
+`./nauty/minimally_rigid_all` holds all the minimally rigid graphs with the given number of vertices (up to 12 vertices).
 
 For benchmarks, minimally rigid graphs were generated randomly as Nauty generates graphs
 that are quite similar - this is problem for larger graph sizes
