@@ -1,17 +1,27 @@
+import itertools
+import math
+import random
 from collections import defaultdict
 from queue import PriorityQueue
-import itertools
-import random
 from typing import *
 
 import networkx as nx
-import math
 
+import nac.check
 from nac.core import (
     coloring_from_mask,
     create_bitmask_for_component_graph_cycle,
     mask_matches_templates,
     mask_to_vertices,
+)
+from nac.cycle_detection import find_cycles
+from nac.data_type import Edge, NACColoring
+from nac.development import (
+    NAC_PRINT_SWITCH,
+    NAC_statistics_colorings_merge,
+    NAC_statistics_generator,
+    graphviz_component_graph,
+    graphviz_graph,
 )
 from nac.strategies_merging import (
     dynamic,
@@ -27,29 +37,17 @@ from nac.strategies_merging import (
 )
 from nac.strategies_split import (
     degree_ordered_nodes,
-    subgraphs_strategy_degree_cycles,
+    subgraphs_strategy_beam_neighbors_deprecated,
+    subgraphs_strategy_bfs,
+    subgraphs_strategy_components_deprecated,
+    subgraphs_strategy_cuts,
     subgraphs_strategy_cycles,
     subgraphs_strategy_cycles_match_chunks,
-    subgraphs_strategy_bfs,
-    subgraphs_strategy_neighbors,
-    subgraphs_strategy_beam_neighbors_deprecated,
-    subgraphs_strategy_components_deprecated,
+    subgraphs_strategy_degree_cycles,
     subgraphs_strategy_kernighan_lin,
-    subgraphs_strategy_cuts,
+    subgraphs_strategy_neighbors,
 )
 from nac.util.repetable_iterator import RepeatableIterator
-
-from nac.data_type import NACColoring, Edge
-from nac.development import (
-    NAC_PRINT_SWITCH,
-    NAC_statistics_generator,
-    NAC_statistics_colorings_merge,
-    graphviz_graph,
-    graphviz_component_graph,
-)
-
-from nac.cycle_detection import find_cycles
-import nac.check
 from nac.util.union_find import UnionFind
 
 
@@ -488,9 +486,9 @@ def _subgraphs_join_epochs(
     is_NAC_coloring_routine: Callable[[nx.Graph, NACColoring], bool],
     from_angle_preserving_components: bool,
     ordered_comp_ids: List[int],
-    epoch1: Iterable[int],
+    epoch_1: Iterable[int],
     subgraph_mask_1: int,
-    epoch2: RepeatableIterator[int],
+    epoch_2: RepeatableIterator[int],
     subgraph_mask_2: int,
 ) -> Iterable[int]:
     """
@@ -501,7 +499,19 @@ def _subgraphs_join_epochs(
 
     Almost NAC coloring is NAC coloring that is not necessarily surjective.
 
-    Returns found almost NAC colorings and mask of the new subgraph
+    Parameters
+    ----------
+    epoch_1
+        iterator of almost NAC colorings of the first subgraph
+        except for the symmetric ones.
+    epoch_2
+        iterator of almost NAC colorings of the second subgraph
+        except for the symmetric ones.
+
+    Returns
+    -------
+    Found almost NAC colorings and mask of the new subgraph.
+    For each almost NAC coloring for each symmetric tuple, only one is yielded.
     """
 
     if subgraph_mask_1 & subgraph_mask_2:
@@ -540,12 +550,17 @@ def _subgraphs_join_epochs(
     counter = 0
     if NAC_PRINT_SWITCH:
         print(
-            f"Join started ({2**subgraph_mask_1.bit_count()}+{2**subgraph_mask_2.bit_count()}->{2**subgraph_mask.bit_count()})"
+            f"Join started ({2 ** subgraph_mask_1.bit_count()}+{2 ** subgraph_mask_2.bit_count()}->{2 ** subgraph_mask.bit_count()})"
         )
 
     # in case lazy_product is removed, return nested fors as they are faster
     # and also return repeatable iterator requirement
-    mask_iterator = ((mask1, mask2) for mask1 in epoch1 for mask2 in epoch2)
+    mask_iterator = (
+        (mask1, mask2 ^ mod)
+        for mask1 in epoch_1
+        for mask2 in epoch_2
+        for mod in (0, subgraph_mask_2)
+    )
 
     # this prolongs the overall computation time,
     # but in case we need just a "small" number of colorings,
@@ -1030,11 +1045,6 @@ def _colorings_merge(
     (epoch2, subgraph_mask_2) = colorings_2
     epoch1 = RepeatableIterator(epoch1)
     epoch2 = RepeatableIterator(epoch2)
-    # epoch2_switched = ( # could be RepeatableIterator
-    epoch2_switched = RepeatableIterator(
-        # this has to be list so the iterator is not iterated concurrently
-        [coloring ^ subgraph_mask_2 for coloring in epoch2]
-    )
 
     vertices_1 = mask_to_vertices(ordered_comp_ids, component_to_edges, colorings_1[1])
     vertices_2 = mask_to_vertices(ordered_comp_ids, component_to_edges, colorings_2[1])
@@ -1044,9 +1054,9 @@ def _colorings_merge(
 
         def generator() -> Iterator[int]:
             for c1 in epoch1:
-                for c2, c2s in zip(epoch2, epoch2_switched):
+                for c2 in epoch2:
                     yield c1 | c2
-                    yield c1 | c2s
+                    yield c1 | c2 ^ subgraph_mask_2  # switched colors
 
         return (
             generator(),
@@ -1055,31 +1065,17 @@ def _colorings_merge(
 
     # if at least two vertices are shared, we need to do the full check
     return (
-        itertools.chain(
-            _subgraphs_join_epochs(
-                graph,
-                comp_graph,
-                component_to_edges,
-                is_NAC_coloring_routine,
-                from_angle_preserving_components,
-                ordered_comp_ids,
-                epoch1,
-                subgraph_mask_1,
-                epoch2,
-                subgraph_mask_2,
-            ),
-            _subgraphs_join_epochs(
-                graph,
-                comp_graph,
-                component_to_edges,
-                is_NAC_coloring_routine,
-                from_angle_preserving_components,
-                ordered_comp_ids,
-                epoch1,
-                subgraph_mask_1,
-                epoch2_switched,
-                subgraph_mask_2,
-            ),
+        _subgraphs_join_epochs(
+            graph,
+            comp_graph,
+            component_to_edges,
+            is_NAC_coloring_routine,
+            from_angle_preserving_components,
+            ordered_comp_ids,
+            epoch1,
+            subgraph_mask_1,
+            epoch2,
+            subgraph_mask_2,
         ),
         subgraph_mask_1 | subgraph_mask_2,
     )
