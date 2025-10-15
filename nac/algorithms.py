@@ -569,8 +569,8 @@ def _subgraphs_join_epochs(
     # TODO benchmark on larger dataset
     # mask_iterator = lazy_product(epoch1, epoch2)
 
-    for mask1, mask2 in mask_iterator:
-        mask = mask1 | mask2
+    for mark_1, mark_2 in mask_iterator:
+        mask = mark_1 | mark_2
 
         if mask_matches_templates(templates, mask, subgraph_mask):
             continue
