@@ -1186,8 +1186,8 @@ def plot_is_NAC_coloring_calls(
     }
 
     ops_x_column = [
-        "vertex_no",
-        "monochromatic_classes_no",
+        Columns.MONOCHROMATIC_CLASSES_NO,
+        Columns.VERTEX_NO,
     ]
     ops_value_groups = [
         [
