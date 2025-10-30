@@ -19,7 +19,7 @@ from nac import NiceGraph as Graph
 DIR_STORE = os.path.join("graphs_store")
 DIR_RANDOM = os.path.join(DIR_STORE, "random")
 DIR_EXTRACTED = os.path.join(DIR_STORE, "extracted")
-DIR_NO_NAC = os.path.join(DIR_RANDOM, "no_NAC_coloring_graphs")
+DIR_NO_NAC = os.path.join(DIR_RANDOM, "no_NAC_coloring")
 
 DIR_LAMAN_NAUTY = os.path.join(DIR_STORE, "nauty")
 DIR_LAMAN = os.path.join(DIR_LAMAN_NAUTY, "minimally_rigid_some")
@@ -30,7 +30,7 @@ DIR_LAMAN_RANDOM = os.path.join(DIR_RANDOM, "minimally_rigid")
 
 
 ################################################################################
-def _filter_triangle_only_laman_graphs(graphs) -> filter:
+def _filter_triangle_only_graphs(graphs) -> filter:
     return filter(
         lambda g: len(nac.find_monochromatic_classes(g)[1]) > 1,
         graphs,
@@ -46,7 +46,7 @@ def _filter_non_connected(graphs: Iterable[Graph]) -> Iterable[Graph]:
 ################################################################################
 
 
-def load_laman_graphs(dir: str = DIR_LAMAN, shuffle: bool = True) -> Iterable[Graph]:
+def load_minimally_rigid(dir: str = DIR_LAMAN, shuffle: bool = True) -> Iterable[Graph]:
     graphs: List[Graph] = []
     for file in os.listdir(dir):
         if not file.endswith(".g6"):
@@ -60,15 +60,15 @@ def load_laman_graphs(dir: str = DIR_LAMAN, shuffle: bool = True) -> Iterable[Gr
     if shuffle:
         random.Random(42).shuffle(graphs)
 
-    return _filter_triangle_only_laman_graphs(graphs)
+    return _filter_triangle_only_graphs(graphs)
 
 
-def load_laman_random_graphs(shuffle: bool = True) -> Iterable[Graph]:
-    return load_laman_graphs(dir=DIR_LAMAN_RANDOM, shuffle=shuffle)
+def load_minimally_rigid_random_graphs(shuffle: bool = True) -> Iterable[Graph]:
+    return load_minimally_rigid(dir=DIR_LAMAN_RANDOM, shuffle=shuffle)
 
 
-def load_laman_degree_3_plus(shuffle: bool = True) -> Iterable[Graph]:
-    return load_laman_graphs(dir=DIR_LAMAN_DEGREE_3_PLUS, shuffle=shuffle)
+def load_minimally_rigid_degree_3_plus(shuffle: bool = True) -> Iterable[Graph]:
+    return load_minimally_rigid(dir=DIR_LAMAN_DEGREE_3_PLUS, shuffle=shuffle)
 
 
 LAMAN_ALL_DIR = os.path.join(DIR_LAMAN_NAUTY, "minimally_rigid_all")
@@ -77,7 +77,7 @@ LAMAN_DEGREE_3_PLUS_ALL_DIR = os.path.join(DIR_STORE, "minimally_rigid_degree_3_
 LAMAN_DEGREE_3_PLUS_ALL_FILENAME = "D3LamanGraphs{}.m"
 
 
-def load_laman_all(
+def load_minimally_rigid_all(
     vertices_no: int,
     DIR: str = LAMAN_ALL_DIR,
     FILENAME: str | None = None,
@@ -96,7 +96,7 @@ def load_laman_all(
             yield Graph(g)
 
 
-def load_laman_degree_3_plus_all(
+def load_minimally_rigid_degree_3_plus_all(
     vertices_no: int, limit: int | None = None
 ) -> Iterable[nx.Graph]:
     import pyrigi
@@ -184,14 +184,8 @@ def load_no_3_nor_4_cycle_graphs() -> List[Graph]:
     return load_graph6_graphs_from_dir(os.path.join(DIR_STORE, "no_3_nor_4_cycles"))
 
 
-def load_globally_rigid_graphs() -> List[Graph]:
-    return load_graph6_graphs_from_dir(os.path.join(DIR_RANDOM, "globally_rigid"))
-
-
-def load_sparse_with_few_colorings_graphs() -> List[Graph]:
-    return load_graph6_graphs_from_dir(
-        os.path.join(DIR_RANDOM, "sparse_with_few_colorings")
-    )
+def load_globally_rigid_nac_critical_graphs() -> List[Graph]:
+    return load_graph6_graphs_from_dir(os.path.join(DIR_RANDOM, "globally_rigid_nac_critical"))
 
 
 def load_no_NAC_coloring_graphs_gathered() -> List[Graph]:

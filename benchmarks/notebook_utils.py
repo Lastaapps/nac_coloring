@@ -181,7 +181,7 @@ class MeasurementResult:
 
 
 ###############################################################################
-def toBenchmarkResults(data: List[MeasurementResult] = []) -> pd.DataFrame:
+def to_benchmark_results(data: List[MeasurementResult] = []) -> pd.DataFrame:
     """
     Converts the list of measurements into a dataframe
     """
@@ -251,7 +251,7 @@ def load_records(
         if file_name is None:
             if allow_output or OUTPUT_VERBOSE:
                 print(f"No file with results found in {dir}!")
-            return toBenchmarkResults()
+            return to_benchmark_results()
         print(f"Found file: {file_name}")
 
     path = os.path.join(dir, file_name)
@@ -910,6 +910,7 @@ class Columns:
     FIRST_CHECKS = "nac_first_check_cycle_mask"
     ALL_TIME = "nac_all_mean_time"
     ALL_CHECKS = "nac_all_check_cycle_mask"
+
     VERTEX_NO = "vertex_no"
     MONOCHROMATIC_CLASSES_NO = "monochromatic_classes_no"
     TRIANGLE_COMPONENTS_NO = "triangle_components_no"
@@ -927,11 +928,11 @@ def plot_frame(
         Columns.ALL_CHECKS,
     ],
     ops_x_column=[
-        Columns.VERTEX_NO,
         Columns.MONOCHROMATIC_CLASSES_NO,
+        Columns.VERTEX_NO,
     ],
     ops_based_on=[
-        #  "relabel",
+        # "relabel",
         # "split",
         # "merging",
         "split_merging",

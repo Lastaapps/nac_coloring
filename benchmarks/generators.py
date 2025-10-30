@@ -17,10 +17,6 @@ import nac
 from nac import NiceGraph as Graph
 from benchmarks import datasets
 
-# TODO import PyRigi
-
-################################################################################
-
 
 class RangeWithCount(NamedTuple):
     """
@@ -89,9 +85,9 @@ def _generate_random_graphs_impl(
 
 
 # takes ~1h 30m on my laptop
-def generate_random_laman_graphs(
+def generate_random_minimally_rigid_graphs(
     dir: str = datasets.DIR_LAMAN_RANDOM,
-    filename_template: str = "laman_{0}",
+    filename_template: str = "minimally_rigid_{0}",
     seed: int | None = 42,
 ) -> List[Tuple[int, List[nx.Graph]]]:
     ranges = (
@@ -103,16 +99,16 @@ def generate_random_laman_graphs(
     )
     return _generate_random_graphs_impl(
         ranges,
-        lambda n, seed: _generate_laman_graph(n, seed),
+        lambda n, seed: _generate_minimally_rigid(n, seed),
         dir,
         filename_template,
         seed,
     )
 
 
-def generate_random_globally_rigid_graphs(
-    dir: str = os.path.join(datasets.DIR_RANDOM, "globally_rigid"),
-    filename_template: str = "globally_rigid_{0}",
+def generate_random_globally_rigid_nac_critical_graphs(
+    dir: str = os.path.join(datasets.DIR_RANDOM, "globally_rigid_nac_critical"),
+    filename_template: str = "globally_rigid_nac_critical_{0}",
     seed: int | None = 42,
 ) -> List[Tuple[int, List[nx.Graph]]]:
     ranges = (
@@ -124,28 +120,7 @@ def generate_random_globally_rigid_graphs(
     )
     return _generate_random_graphs_impl(
         ranges,
-        lambda n, seed: _generate_globally_rigid_graph(n, seed),
-        dir,
-        filename_template,
-        seed,
-    )
-
-
-def generate_random_sparse_with_few_colorings_graphs(
-    dir: str = os.path.join(datasets.DIR_RANDOM, "sparse_with_few_colorings"),
-    filename_template: str = "sparse_with_few_colorings_{0}",
-    seed: int | None = 42,
-) -> List[Tuple[int, List[nx.Graph]]]:
-    ranges = (
-        RangeWithCount(10, 20, 100),
-        RangeWithCount(20, 30, 100),
-        RangeWithCount(30, 40, 100),
-        RangeWithCount(40, 50, 100),
-        RangeWithCount(50, 60, 100),
-    )
-    return _generate_random_graphs_impl(
-        ranges,
-        lambda n, seed: _generate_NAC_critical_graph(n, seed),
+        lambda n, seed: _generate_NAC_critical_globally_rigid_graph(n, seed),
         dir,
         filename_template,
         seed,
@@ -157,7 +132,7 @@ def generate_random_sparse_with_few_colorings_graphs(
 ################################################################################
 
 
-def _generate_laman_graph(
+def _generate_minimally_rigid(
     n: int,
     seed: int | None,
     min_degree: int | None = None,
@@ -181,36 +156,6 @@ def _generate_laman_graph(
         return graph
 
 
-def _generate_sparse_graph(
-    n: int,
-    seed: int | None,
-    p: float = 0.1,
-) -> Graph:
-    rand = random.Random(seed)
-    while True:
-        graph = Graph(nx.fast_gnp_random_graph(n, p, seed=rand.randint(0, 2**30)))
-        if not nx.is_connected(graph):
-            continue
-
-        return graph
-
-
-# does not make sense as dense graphs form a single monochromatic class
-# down to 0.3 or 0.2
-def _generate_dense_graph(
-    n: int,
-    seed: int | None,
-    p: float = 0.8,
-) -> Graph:
-    rand = random.Random(seed)
-    while True:
-        graph = Graph(nx.gnp_random_graph(n, p, seed=rand.randint(0, 2**30)))
-        if not nx.is_connected(graph):
-            continue
-
-        return graph
-
-
 def _generate_NAC_critical_graph(
     n: int,
     seed: int | None,
@@ -218,14 +163,13 @@ def _generate_NAC_critical_graph(
 ) -> nx.Graph:
     """
     Generates sparse graphs that should have likely few NAC colorings
-    or no NAC colorings what so ever
+    or no NAC colorings what so ever.
+
+    Uses slightly lower bound that the original paper
+    Sharp thresholds for NAC-colourings and stable cuts in random graphs, 2025,
+    Katie Clinch, John Haslegrave, Tony Huynh, Anthony Nixon
     """
     rand = random.Random(seed)
-
-    # this formula comes from a related
-    # and still unpublished work of related authors
-    # it should lead to graphs that either have
-    # no NAC-coloring or have just few
 
     p = 0.95 * (2 * math.log(n, log_base) / (n * n)) ** (1 / 3)
 
@@ -237,23 +181,22 @@ def _generate_NAC_critical_graph(
         return graph
 
 
-def _generate_globally_rigid_graph(
+def _generate_NAC_critical_globally_rigid_graph(
     n: int,
     seed: int | None,
     log_base: float = math.e,
 ) -> nx.Graph:
     """
-    Generates sparse graphs that should have likely few NAC colorings
-    or no NAC colorings what so ever
+    Generates graphs that should have likely few NAC colorings
+    or no NAC colorings what so ever and are globally rigid.
+
+    Uses bound for NAC-critical graphs provided by paper
+    Sharp thresholds for NAC-colourings and stable cuts in random graphs, 2025,
+    Katie Clinch, John Haslegrave, Tony Huynh, Anthony Nixon
     """
     import pyrigi
 
     rand = random.Random(seed)
-
-    # this formula comes from a related
-    # and still unpublished work of related authors
-    # it should lead to graphs that either have
-    # no NAC-coloring or have just few
 
     p = (2 * math.log(n, log_base) / (n * n)) ** (1 / 3)
     while True:
