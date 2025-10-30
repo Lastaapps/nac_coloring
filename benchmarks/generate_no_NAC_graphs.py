@@ -79,7 +79,7 @@ def with_timeout(func, timeout=60):
     return wrapper
 
 
-DIR = "./graphs_store/no_NAC_coloring_graphs"
+DIR = "./graphs_store/no_NAC_coloring"
 os.makedirs(DIR, exist_ok=True)
 
 
