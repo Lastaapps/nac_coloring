@@ -143,7 +143,6 @@ def score(
 
         e1 = all_epochs[best_pair[0]]
         e2 = all_epochs[best_pair[1]]
-        # print(f"{len(e1[0])} {len(e2[0])} {(e1[1] | e2[1]).bit_count()}")
         iterable, mask = colorings_merge_wrapper(
             all_epochs[best_pair[0]],
             all_epochs[best_pair[1]],
@@ -162,8 +161,6 @@ def dynamic(
     all_epochs: List[Tuple[List[int], int]] = [(list(i), m) for i, m in all_epochs]
 
     all_ones = 2 ** len(all_epochs) - 1
-    # print(len(all_epochs))
-    # print(all_ones)
     cache: List[None | Tuple[int, int, int, Tuple[int, int]]] = [
         None for _ in range(2 ** len(all_epochs))
     ]
@@ -211,9 +208,7 @@ def dynamic(
 
     algo_mask = 0
     while algo_mask != all_ones:
-        # print(f"{algo_mask=} {bin(algo_mask)} <- {bin(all_ones)}")
         _, _, _, best_pair = dynamic_process_search(algo_mask)
-        # print(f"{best_pair=}")
 
         if best_pair[0] == best_pair[1]:
             all_epochs = [all_epochs[best_pair[0]]]
@@ -223,13 +218,11 @@ def dynamic(
 
         e1 = all_epochs[best_pair[0]]
         e2 = all_epochs[best_pair[1]]
-        # print(f"{len(e1[0])} {len(e2[0])} {(e1[1] | e2[1]).bit_count()}")
         iterable, mask = colorings_merge_wrapper(
             all_epochs[best_pair[0]],
             all_epochs[best_pair[1]],
         )
         # this is safe (and slow) as the second coordinate is greater
-        # all_epochs.pop(best_pair[1])
         all_epochs[best_pair[0]] = (list(iterable), mask)
     return all_epochs
 
@@ -305,13 +298,6 @@ def recursion(
             cache[all_ones] = (0, 0, 0, (0, 1))
             return cache
 
-            mlow = 2**bit - 1
-            mhigh = all_ones ^ mlow
-            for i in range(all_ones // 2):
-                i = ((i & mhigh) << 1) | (mlow & i)
-                cache[i] = None
-            return cache
-
         _, _, _, best_pair = dynamic_process_search(algo_mask)
 
         if best_pair[0] == best_pair[1]:
@@ -323,13 +309,11 @@ def recursion(
 
         e1 = all_epochs[best_pair[0]]
         e2 = all_epochs[best_pair[1]]
-        # print(f"{len(e1[0])} {len(e2[0])} {(e1[1] | e2[1]).bit_count()}")
         iterable, mask = colorings_merge_wrapper(
             all_epochs[best_pair[0]],
             all_epochs[best_pair[1]],
         )
         # this is safe (and slow) as the second coordinate is greater
-        # all_epochs.pop(best_pair[1])
         all_epochs[best_pair[0]] = (list(iterable), mask)
     return all_epochs
 

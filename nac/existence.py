@@ -64,37 +64,6 @@ def _can_have_flexible_labeling(
     return m <= n * (n - 1) // 2 - (n - 2)
 
 
-def _check_is_min_rigid_and_NAC_coloring_exists(
-    graph: nx.Graph,
-) -> Optional[bool]:
-    """
-    Paper: Graphs with flexible labelings - Conjecture 5.1.
-    # TODO find where this became theorem
-
-    For minimally rigid graphs it holds that
-    there exists NAC coloring iff graph is not triangle connected.
-
-    Return
-        True if the graph has a NAC coloring,
-        False if we are sure there is none.
-        None if we cannot decide (the graph is not min_rigid)
-    """
-
-    # this call requires pyrigi, which is for this purpose not used
-
-    return None
-
-    # if not graph.is_min_rigid(dim=2):
-    #     # flexible -> has NAC
-
-    # TODO NAC
-    # _, components_to_edges = find_monochromatic_classes(graph)
-    # if not graph.is_min_rigid(dim=2) and len(components_to_edges) > 1:
-    #     return None
-
-    # return len(components_to_edges) != 1
-
-
 def _check_for_simple_stable_cut(
     graph: nx.Graph,
     certificate: bool,
@@ -178,9 +147,5 @@ def has_NAC_coloring_checks(self) -> Optional[bool]:
     # Needs to be run after connectivity checks
     if not _can_have_flexible_labeling(self):
         return False
-
-    res = _check_is_min_rigid_and_NAC_coloring_exists(self)
-    if res is not None:
-        return res
 
     return None

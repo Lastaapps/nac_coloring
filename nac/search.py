@@ -14,7 +14,6 @@ The neighbors strategy is implemented in _subgraphs_strategy_neighbors
 
 The main pair of the search uses only a bitmask representing
 the coloring and converts it back to NAC coloring once a check is need.
-TODO create a class for coloring mask caching its coloring.
 """
 
 from functools import reduce
@@ -57,7 +56,6 @@ def _NAC_colorings_cross_product(
     cache = RepeatableIterator(first)
     for s in second:
         for f in cache:
-            # yield s[0].extend(f[0]), s[1].extend(f[1])
             yield s[0] + f[0], s[1] + f[1]
 
 
@@ -178,7 +176,6 @@ def _NAC_colorings_with_trivial_stable_cuts(
     processor: Callable[[nx.Graph], Iterable[NACColoring]],
     copy: bool = True,
 ) -> Iterable[NACColoring]:
-    # TODO don't waste resources
     _, component_to_edge = find_monochromatic_classes(
         graph,
         is_cartesian_NAC_coloring=False,
@@ -256,8 +253,6 @@ def _relabel_graph_for_NAC_coloring(
     vertices = list(graph.nodes)
 
     if strategy == "none":
-        # this is correct, but harmless (for now)
-        # return graph if not copy else nx.Graph(graph)
         if set(vertices) == set(range(graph.number_of_nodes())):
             return processor(graph)
 
@@ -329,7 +324,7 @@ def NAC_colorings_impl(
     is_cartesian: bool,
     monochromatic_class_type: MonochromaticClassType,
     remove_vertices_cnt: int,
-    use_has_coloring_check: bool,  # I disable the check in tests
+    use_has_coloring_check: bool,
     seed: int | None,
 ) -> Iterable[NACColoring]:
     _NAC_check_called_reset()
@@ -344,7 +339,6 @@ def NAC_colorings_impl(
     rand = random.Random(seed)
 
     def run(graph: nx.Graph) -> Iterable[NACColoring]:
-        # TODO NAC not sure if copy is needed, but I used it before
         graph = NiceGraph(graph)
 
         # in case graph has no edges because of some previous optimizations,

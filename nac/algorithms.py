@@ -88,7 +88,7 @@ def NAC_colorings_cycles(
     """
     Implementation of the naive algorithm improved by using cycles.
     """
-    # so we start with 0
+    # we start with component 0
     components_ids.sort()
 
     # find some small cycles for state filtering
@@ -109,39 +109,15 @@ def NAC_colorings_cycles(
     ]
     templates = [t for t in templates if t[1] > 0]
 
-    # if len(cycles) != 0:
-    #     templates_and_validities = [create_bitmask(c) for c in cycles]
-    #     templates, validities = zip(*templates_and_validities)
-    #     templates = np.stack(templates)
-    #     validities = np.stack(validities)
-    # else:
-    #     templates = np.empty((0, len(components_ids)), dtype=np.bool)
-    #     validities = np.empty((0, len(components_ids)), dtype=np.bool)
-
-    # this is used for mask inversion, because how ~ works on python
-    # numbers, if we used some kind of bit arrays,
-    # this would not be needed.
+    # this is used for mask inversion, because how ~ works on Python ints.
+    # If we use some kind of bit arrays, this would not be needed.
     subgraph_mask = 0  # 2 ** len(components_ids) - 1
     for v in components_ids:
         subgraph_mask |= 1 << v
-    # subgraph_mask = np.ones(len(components_ids), dtype=np.bool)
-    # demasking = 2**np.arange(len(components_ids))
 
     # iterate all the coloring variants
     # division by 2 is used as the problem is symmetrical
     for mask in range(1, 2 ** len(components_ids) // 2):
-        # This is part of a slower implementation using numpy
-        # TODO remove before the final merge
-        # my_mask = (demasking & mask).astype(np.bool)
-        # def check_cycles(my_mask: np.ndarray) -> bool:
-        #     # we mask the cycles
-        #     masked = templates & my_mask
-        #     usable_rows = np.sum(masked, axis=-1) == 1
-        #     valid = masked & validities
-        #     return bool(np.any(valid[usable_rows]))
-        # if check_cycles(my_mask) or check_cycles(my_mask ^ subgraph_mask):
-        #     continue
-
         if mask_matches_templates(templates, mask, subgraph_mask):
             continue
 
@@ -174,11 +150,7 @@ def NAC_colorings_without_vertex(
     subgraph.remove_node(vertex)
 
     endpoints = list(graph.neighbors(vertex))
-    # print()
-    # print(Graph(graph))
-    # print(Graph(subgraph))
 
-    # TODO cache when the last coloring is opposite of the current one
     iterator = iter(
         NAC_colorings_with_non_surjective(
             subgraph,
@@ -187,14 +159,14 @@ def NAC_colorings_without_vertex(
     )
 
     # In case there are no edges in the subgraph,
-    # both the all red and blue components are empty
+    # both red and blue components are empty
     if subgraph.number_of_edges() == 0:
         r, b = next(iterator)
         assert len(r) == 0
         assert len(b) == 0
 
-    # in many of my algorithms I return coloring and it's symmetric
-    # variant after each other. In that case local results are also symmetric
+    # Some of the algorithms here return coloring and it's symmetric
+    # variant after each other. In that case, results here are also symmetric and the check can be faster.
     previous_coloring: NACColoring | None = None
     previous_results: List[NACColoring] = []
 
@@ -218,8 +190,6 @@ def NAC_colorings_without_vertex(
         # component -> connected component in the coloring given
         # group -> set of components
         #          if there are more edges/endpoints, that share the same color
-
-        # print(f"{coloring=}")
 
         # create red & blue components
         def find_components_and_neighbors(
@@ -253,8 +223,6 @@ def NAC_colorings_without_vertex(
             red_neighboring_components,
             blue_neighboring_components,
         )
-        # print(f"{endpoint_to_comp_id=}")
-        # print(f"{neighboring_components=}")
 
         # find endpoints that are connected to the same component
         # we do this for both the red and blue, as this constrain has
@@ -281,19 +249,13 @@ def NAC_colorings_without_vertex(
             else:
                 comp_to_endpoint[1][comp_id] = u
 
-        # print(f"{same_groups=}")
-        # print(f"{comp_to_endpoint=}")
-
         # Now we need to create an equivalent of component_to_edges
-        # or to be precise vertex to edges
-        # endpoint_to_same: List[List[int]] = [[] for _ in endpoints]
         endpoint_to_same: Dict[int, List[int]] = defaultdict(list)
         unique = set()
         for u in endpoints:
             id = same_groups.find(u)
             endpoint_to_same[id].append(u)
             unique.add(id)
-        # print(f"{endpoint_to_same=}")
 
         # Now we need to remove empty components,
         # but keep relation to neighbors (update vertex_to_components)
@@ -336,19 +298,9 @@ def NAC_colorings_without_vertex(
             group_to_components_masks[0].append(mask0)
             group_to_components_masks[1].append(mask1)
 
-        # print(f"{groups=}")
-        # print(f"{group_to_components=}")
-
         # Map everything to groups so we don't need to use indirection later
         groups_neighbors: Tuple[List[int], List[int]] = ([], [])
         for red_components, blue_components in zip(*group_to_components):
-            # groups_neighbors[0].append(
-            #     {n for comp_id in red_components for n in neighboring_components[0][comp_id]}
-            # )
-            # groups_neighbors[1].append(
-            #     {n for comp_id in blue_components for n in neighboring_components[1][comp_id]}
-            # )
-
             mask = 0
             for comp_id in red_components:
                 for n in neighboring_components[0][comp_id]:
@@ -361,26 +313,6 @@ def NAC_colorings_without_vertex(
                     mask |= 1 << n
             groups_neighbors[1].append(mask)
 
-        # print(f"{groups_neighbors=}")
-
-        # Check for contradictions
-        # if there are in one component edges that share the same component
-        # using one color, but use neighboring components using the other
-        # color, we can exit now as all the coloring cannot pass
-        # contradiction_found = False
-        # TODO not working
-        # for red_components, blue_components, red_neighbors, blue_neighbors in zip(
-        #     *group_to_components, *groups_neighbors
-        # ):
-        #     if len(red_neighbors.intersection(red_components)) > 0:
-        #         contradiction_found = True
-        #     if len(blue_neighbors.intersection(blue_components)) > 0:
-        #         contradiction_found = True
-        # if contradiction_found:
-        #     print("Contradiction found")
-        #     break
-        # TODO check if not all the components are neighboring
-
         groups_edges: List[List[Edge]] = [
             [(vertex, endpoint) for endpoint in group] for group in groups
         ]
@@ -388,12 +320,6 @@ def NAC_colorings_without_vertex(
         # Now we iterate all the possible colorings of groups
         for mask in range(2 ** len(groups)):
             # we create red and blue components lists
-            # current_comps = ([], [])
-            # for i in range(len(groups)):
-            #     if mask & (1 << i):
-            #         current_comps[0].extend(group_to_components[0][i])
-            #     else:
-            #         current_comps[1].extend(group_to_components[1][i])
             current_comps0, current_comps1 = (0, 0)
             for i in range(len(groups)):
                 if mask & (1 << i):
@@ -427,12 +353,8 @@ def NAC_colorings_without_vertex(
                 coloring[1] + current_edges[1],
             )
             if len(to_emit[0]) * len(to_emit[1]) > 0:
-                # print(f"{graph.number_of_nodes()} -> {to_emit=}")
-                # assert nx.Graph(graph).is_NAC_coloring(to_emit)
-
                 yield to_emit
                 previous_results.append(to_emit)
-        # print()
 
 
 ################################################################################
@@ -562,11 +484,6 @@ def _subgraphs_join_epochs(
         for mod in (0, subgraph_mask_2)
     )
 
-    # this prolongs the overall computation time,
-    # but in case we need just a "small" number of colorings,
-    # this can provide them faster
-    # disabled as result highly depended on the graph given
-    # TODO benchmark on larger dataset
     # mask_iterator = lazy_product(epoch1, epoch2)
 
     for mark_1, mark_2 in mask_iterator:
@@ -614,7 +531,6 @@ def _subgraph_colorings_generator(
                 offset,
             )
         case 1:
-            # TODO implement _NAC_CHECK_CYCLE_MASK counting
             assert False
             return _subgraph_colorings_removal_generator(
                 graph,
@@ -643,7 +559,6 @@ def _subgraph_colorings_cycles_generator(
     """
     # The last chunk can be smaller
     local_ordered_comp_ids: List[int] = ordered_comp_ids[offset : offset + chunk_size]
-    # print(f"Local comp_ids: {local_ordered_comp_ids}")
 
     local_comp_graph = nx.Graph(nx.induced_subgraph(comp_graph, local_ordered_comp_ids))
     local_cycles = find_cycles(
@@ -704,8 +619,6 @@ def _subgraph_colorings_removal_generator(
     division by 2 is used as the problem is symmetrical
     """
 
-    # TODO assert for cartesian NAC coloring
-
     local_partitions: List[int] = partitions[offset : offset + chunk_size]
     local_edges = [
         edge for comp_id in local_partitions for edge in component_to_edges[comp_id]
@@ -713,8 +626,6 @@ def _subgraph_colorings_removal_generator(
     graph = nx.edge_subgraph(graph, local_edges)
 
     def processor(graph: nx.Graph) -> Iterable[NACColoring]:
-        # print(f"graph={Graph(graph)}")
-        # return list(_NAC_colorings_without_vertex(processor, graph, None))
         return NAC_colorings_without_vertex(processor, graph, None)
 
     nodes_iter = iter(local_partitions)
@@ -730,19 +641,9 @@ def _subgraph_colorings_removal_generator(
         edge_map[(edge[0], edge[1])] = local_partitions.index(comp_id) + 1
         edge_map[(edge[1], edge[0])] = local_partitions.index(comp_id) + 1
 
-    # print()
-    # print(f"{component_to_edges=}")
-    # print(f"{partitions=} {offset=} {chunk_size=}")
-    # print(f"{edge_map=}")
-    # produced = set()
-    # print("Accepted", bin(0))
-    # all_ones = 2**len(local_partitions) - 1
-
     counter = 0
     yield 0
     for red, blue in processor(graph):
-        # TODO swith red and blue if blue is smaller
-        # print(f"{red=} {blue=}")
         mask = 0
         invalid_coloring_found = False
         for edge in red:
@@ -761,7 +662,6 @@ def _subgraph_colorings_removal_generator(
                     and (partiotion_edge[1], partiotion_edge[0]) not in red
                 ):
                     invalid_coloring_found = True
-                    # print(f"Invalid red  coloring {partition_ind=}({edge_map[edge]-1}) -> {partition_id=}")
                     break
             if invalid_coloring_found:
                 break
@@ -781,7 +681,6 @@ def _subgraph_colorings_removal_generator(
                     and (partiotion_edge[1], partiotion_edge[0]) not in blue
                 ):
                     invalid_coloring_found = True
-                    # print(f"Invalid blue coloring {partition_ind=}({edge_map[edge]-1}) -> {partition_id=}")
                     break
             if invalid_coloring_found:
                 break
@@ -793,17 +692,6 @@ def _subgraph_colorings_removal_generator(
             continue
         counter += 1
         mask <<= offset
-
-        # print("Accepted", bin(mask))
-        # coloring = coloring_from_mask(
-        #     local_partitions,
-        #     component_to_edges,
-        #     mask >> offset,
-        # )
-        # print(f"{coloring=}")
-        # if mask in produced:
-        #     assert False
-        # produced.add(mask)
 
         yield mask
 
@@ -1008,7 +896,6 @@ def _apply_split_strategy_to_order_vertices(
                 preferred_chunk_size=preferred_chunk_size,
                 seed=seed,
             )
-            # TODO refactor later
             chunk_sizes = [len(subgraph) for subgraph in subgraph_classes]
             ordered_comp_ids = [v for subgraph in subgraph_classes for v in subgraph]
         case "cuts":
@@ -1017,7 +904,6 @@ def _apply_split_strategy_to_order_vertices(
                 preferred_chunk_size=preferred_chunk_size,
                 seed=seed,
             )
-            # TODO refactor later
             chunk_sizes = [len(subgraph) for subgraph in subgraph_classes]
             ordered_comp_ids = [v for subgraph in subgraph_classes for v in subgraph]
         case _:
@@ -1201,21 +1087,13 @@ def NAC_colorings_subgraphs(
     preferred_chunk_size = min(preferred_chunk_size, comp_graph.number_of_nodes())
     assert preferred_chunk_size >= 1
 
-    # Represents size (no. of vertices (components) of the t-graph) of a basic subgraph
+    # Represents size (no. of vertices (components) of the component graph) of a basic subgraph
     components_no = comp_graph.number_of_nodes()
 
     def create_chunk_sizes() -> List[int]:
         """
         Makes sure all the chunks are the same size of 1 bigger
-
-        Could be probably significantly simpler,
-        like np.fill and add some bitmask, but this was my first idea,
-        get over it.
         """
-        # chunk_size = max(
-        #     int(np.sqrt(components_no)), min(preferred_chunk_size, components_no)
-        # )
-        # chunk_no = (components_no + chunk_size - 1) // chunk_size
         chunk_no = components_no // preferred_chunk_size
         chunk_sizes = []
         remaining_len = components_no
@@ -1310,7 +1188,6 @@ def NAC_colorings_subgraphs(
     assert expected_subgraph_mask == all_epochs[0][1]
 
     for mask in all_epochs[0][0]:
-        # print(f"Got mask={bin(mask)}")
         if mask == 0 or mask.bit_count() == len(ordered_comp_ids):
             continue
 

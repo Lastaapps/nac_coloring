@@ -83,29 +83,11 @@ def _is_NAC_coloring_impl(
         allow_non_surjective: if True, allows the coloring to be non-surjective.
             This can be useful for checking subgraphs - the can use only one color.
     ----------
-
-
-    (TODO format)
     """
     global _NAC_CHECK_IS_NAC_COLORING
     _NAC_CHECK_IS_NAC_COLORING += 1
 
     red, blue = coloring
-
-    # TODO NAC reimplement advanced graph vertices caching in PyRigi
-    # # 43% speedup (from base solution, current work around was not yet compared)
-    # # !!! make sure !!! this graph is cleared before every run
-    # # this also makes the whole NAC coloring search thread insecure
-    # # things will break if you add vertices while another search
-    # # is still running
-
-    # G = graph._graph_is_NAC_coloring
-
-    # # somehow this if is faster than setting things outside once
-    # if G is None:
-    #     G = nx.Graph()
-    #     G.add_nodes_from(graph.nodes)
-    #     graph._graph_is_NAC_coloring = G
 
     # Workaround
     G = NiceGraph()
@@ -128,9 +110,6 @@ def is_NAC_coloring(
     ----------
         coloring: the coloring to check if it is a NAC coloring.
     ----------
-
-
-    (TODO format)
     """
     red: Collection[Edge]
     blue: Collection[Edge]
@@ -145,7 +124,7 @@ def is_NAC_coloring(
         return False
 
     # Both colors have to be used
-    if len(red) == 0 or len(blue) == 0:  # this is faster than *
+    if len(red) == 0 or len(blue) == 0:
         return False
 
     if len(red) + len(blue) != len(graph.edges):
@@ -154,12 +133,9 @@ def is_NAC_coloring(
     if type(red) == set and len(red.intersection(blue)) != 0:
         return False
     else:
-        # Yes, this is slower - in case you care, use sets
         for e in red:
             if e in blue:
                 return False
-
-    # graph._graph_is_NAC_coloring = None
 
     return _is_NAC_coloring_impl(graph, (red, blue))
 
@@ -185,13 +161,6 @@ def _is_cartesian_NAC_coloring_impl(
         if no problem is found, return true
     """
 
-    # # TODO NAC
-    # # See description in the function above
-    # G = graph._graph_is_NAC_coloring
-    # if G is None:
-    #     G = nx.Graph()
-    #     G.add_nodes_from(graph.nodes)
-    #     graph._graph_is_NAC_coloring = G
     G = NiceGraph()
     G.add_nodes_from(graph.nodes)
 
@@ -219,9 +188,6 @@ def _is_cartesian_NAC_coloring_impl(
     G.clear_edges()
     G.add_edges_from(blue)
 
-    # TODO benchmark
-    # neighbors: Set[Tuple[int, int]] = set()
-    # neighbors: List[Set[int]] = [[] for _ in range(id)]
     neighbors: List[List[int]] = [[] for _ in range(id)]
 
     for blue_id, blue_comp in enumerate(nx.components.connected_components(G)):
@@ -229,11 +195,6 @@ def _is_cartesian_NAC_coloring_impl(
             red_id: int = comp_ids[v]
             if red_id == -1:
                 continue
-
-            # key: Tuple[int, int] = (blue_id, red_id)
-            # if key in neighbors:
-            #     return False
-            # neighbors.add(key)
 
             if blue_id in neighbors[red_id]:
                 return False
@@ -283,18 +244,14 @@ def is_cartesian_NAC_coloring(
     if not check_NAC_constrains(graph):
         return False
 
-    # We should rather check if the edges match exactly,
-    # but that would be a little slower
     if not runs_on_subgraph and len(red) + len(blue) != len(graph.edges):
         return False
 
     if type(red) == set and len(red.intersection(blue)) != 0:
         return False
     else:
-        # Yes, this is slower - in case you care, use sets
         for e in red:
             if e in blue:
                 return False
 
-    # graph._graph_is_NAC_coloring = None
     return _is_cartesian_NAC_coloring_impl(graph, (red, blue))

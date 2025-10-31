@@ -64,7 +64,7 @@ def coloring_from_mask(
     if allow_mask is None:
         allow_mask = 2 ** len(ordered_comp_ids) - 1
 
-    red, blue = [], []  # set(), set()
+    red, blue = [], []
     for i, e in enumerate(ordered_comp_ids):
         address = 1 << i
 
@@ -72,22 +72,8 @@ def coloring_from_mask(
             continue
 
         edges = component_to_edges[e]
-        # (red if mask & address else blue).update(edges)
         (red if mask & address else blue).extend(edges)
     return (red, blue)
-
-    # numpy impl, ~10% slower
-    # if allow_mask is not None:
-    #     ordered_comp_ids = ordered_comp_ids[allow_mask]
-    #     mask = mask[allow_mask]
-
-    # red_vert = ordered_comp_ids[mask]
-    # blue_vert = ordered_comp_ids[~mask]
-
-    # red = [edge for edges in red_vert for edge in component_to_edges[edges]]
-    # blue = [edge for edges in blue_vert for edge in component_to_edges[edges]]
-
-    # return (red, blue)
 
 
 ################################################################################
@@ -157,12 +143,9 @@ def create_bitmask_for_component_graph_cycle(
 
     template = 0
     valid = 0
-    # template = np.zeros(len(ordered_comp_ids), dtype=np.bool)
-    # valid = np.zeros(len(ordered_comp_id), dtype=np.bool)
 
     for v in cycle:
         template |= 1 << v
-        # template[v] = True
 
     def check_for_connecting_edge(prev: int, curr: int, next: int) -> bool:
         """
@@ -174,17 +157,15 @@ def create_bitmask_for_component_graph_cycle(
         vertices_curr = {v for e in component_to_edges(curr) for v in e}
 
         # You may think that if the component is a single edge,
-        # it must connect the circle. Because we are using a t-graph,
+        # it must connect the circle. Because we are using a component graph,
         # which is based on the line graph idea, the edge can share
         # a vertex with both the neighboring components.
         # An example for this is a star with 3 edges.
 
         vertices_prev = {v for e in component_to_edges(prev) for v in e}
         vertices_next = {v for e in component_to_edges(next) for v in e}
-        # print(f"{vertices_prev=} {vertices_curr=} {vertices_next=}")
         intersections_prev = vertices_prev.intersection(vertices_curr)
         intersections_next = vertices_next.intersection(vertices_curr)
-        # print(f"{intersections_prev=} {intersections_next=}")
 
         if local_ordered_comp_ids is not None:
             intersections_prev = intersections_prev.intersection(local_ordered_comp_ids)
@@ -200,9 +181,7 @@ def create_bitmask_for_component_graph_cycle(
     for prev, curr, next in zip(cycle[-1:] + cycle[:-1], cycle, cycle[1:] + cycle[:1]):
         if check_for_connecting_edge(prev, curr, next):
             valid |= 1 << curr
-            # valid[curr] = True
 
-    # print(cycle, bin(template), bin(valid))
     return template, valid
 
 
@@ -238,9 +217,6 @@ def mask_matches_templates(
         if cnt != 1:
             continue
 
-        # now we know there is one node that has a wrong color
-        # we check if the node is a triangle component
-        # if so, we need to know it if also ruins the coloring
         if stamp & validity:
             return True
     return False

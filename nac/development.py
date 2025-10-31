@@ -14,7 +14,7 @@ from nac.data_type import Edge
 
 statistics_storage: Dict[int, List[Any]] = defaultdict(list)
 
-# TODO NAC remove optional printing
+# optional printing
 NAC_PRINT_SWITCH = False
 # NAC_PRINT_SWITCH = True
 

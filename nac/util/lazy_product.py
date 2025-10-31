@@ -4,15 +4,15 @@ from typing import Iterator, Tuple
 
 def lazy_product[T, R](iter1: Iterator[T], iter2: Iterator[R]) -> Iterator[Tuple[T, R]]:
     """
-    Alternative for itertools.product that exhausts bot the iterators in parallel.
-    In the standard implementation first the first iterator is exhausted
+    Alternative for itertools.product that exhausts both the iterators in parallel.
+    In the standard implementation, first the first iterator is exhausted
     and then second element of the other iterator is read.
     Here both the iterators switch roles in who takes the next element.
 
     This function is slightly slower and requires more memory as it's not
     written in C, on the other hand it can provide some combinations
-    sooner and some sooner terminating algorithms may find it beneficial.
-    Also the itertools.product is blocking (it waits for the result),
+    sooner and some early termining algorithms may find it beneficial.
+    Also, the itertools.product is blocking (it waits for the result),
     this is not.
 
     Returns

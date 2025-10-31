@@ -133,7 +133,6 @@ def find_monochromatic_classes(
                 if n not in v_neighbours:
                     continue
 
-                # hooray, we have an intersection
                 components.join((u, v), (w, n))
                 components.join((u, w), (v, n))
 
@@ -160,9 +159,9 @@ def create_component_graph_from_components(
     edges_to_components: Dict[Edge, int],
 ) -> nx.Graph:
     """
-    Deprecated as the whole T-graph idea
+    Deprecated as the whole component graph idea
 
-    Creates a T graph from the components given.
+    Creates a component graph from the components given.
     Each edge must belong to a component.
     Ids of these components are then used
     as vertices of the new graph.

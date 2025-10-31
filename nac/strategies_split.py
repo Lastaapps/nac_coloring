@@ -40,7 +40,6 @@ def _cycles_per_vertex(
         all=True,
     )
 
-    # vertex_cycles = [[] for _ in range(comp_graph.number_of_nodes())]
     vertex_cycles = [[] for _ in range(max(comp_graph.nodes) + 1)]
     for cycle in cycles:
         for v in cycle:
@@ -222,9 +221,9 @@ def subgraphs_strategy_neighbors(
     Params
     ------
         graph:
-            TODO subgraph of the original graph that the algorithm operates on
+            subgraph of the original graph that the algorithm operates on
         comp_graph:
-            holds monochromatic components TODO
+            holds monochromatic components
         components_to_edges:
             mapping giving for a component id
             (a vertex in comp_graph) list of edges of the component
@@ -263,11 +262,6 @@ def subgraphs_strategy_neighbors(
 
     # start algo and fill a chunk
     while comp_graph.number_of_nodes() > 0:
-        # TODO connected components
-        # TODO run algorithm per component, not per vertex
-        # TODO omit adding components with only single connection when
-        #      the chunk is almost full
-
         component_ids = list(comp_graph.nodes)
         rand_comp = component_ids[rand.randint(0, len(component_ids) - 1)]
 
@@ -323,7 +317,6 @@ def subgraphs_strategy_neighbors(
                     added_components = set([c for c in cycle])
                     target.extend(cycle)
             else:
-                # print(f"Rand comp: {rand_comp} -> {component_to_edges[rand_comp]}")
                 added_components: Set[int] = set([rand_comp])
                 target.append(rand_comp)
             is_random_component_required[chunk_index] = False
@@ -335,7 +328,7 @@ def subgraphs_strategy_neighbors(
             v for comp in target for e in component_to_edges[comp] for v in e
         }
 
-        # vertices queue of vertices to search trough
+        # vertices queue of vertices to search through
         opened: Set[int] = set()
 
         # add all the neighbors of the vertices of the already used components
@@ -377,9 +370,6 @@ def subgraphs_strategy_neighbors(
                     )
                     for u in opened
                 ]
-
-            # shuffling seams to decrease the performance
-            # rand.shuffle(values)
 
             # chooses a vertex with the highest score
             best_vertex = max(values, key=lambda x: x[1])[0]
@@ -452,7 +442,6 @@ def subgraphs_strategy_beam_neighbors_deprecated(
     comp_graph = nx.Graph(comp_graph)
     ordered_comp_ids_groups: List[List[int]] = [[] for _ in chunk_sizes]
     beam_size: int = min(chunk_sizes[0], 10)
-    # beam_size: int = 1024
 
     while comp_graph.number_of_nodes() > 0:
         if start_from_min:
@@ -489,15 +478,9 @@ def subgraphs_strategy_beam_neighbors_deprecated(
                     break
 
         while queue and len(target) < chunk_sizes[index_min]:
-            # more neighbors are already part of the graph -> more better
-            # also, this is asymptotically really slow,
-            # but I'm not implementing smart heaps, this is python,
-            # it's gonna be slow anyway (also the graphs are small)
-
             values = [
                 len(added_comp_ids.intersection(comp_graph.neighbors(u))) for u in queue
             ]
-            # values = [(len(added_comp_ids.intersection(comp_graph.neighbors(u))), -comp_graph.degree(u)) for u in queue]
 
             sorted_by_metric = sorted(
                 [i for i in range(len(values))],
@@ -506,12 +489,6 @@ def subgraphs_strategy_beam_neighbors_deprecated(
             )
             v = queue[sorted_by_metric[0]]
             queue = [queue[i] for i in sorted_by_metric[1 : beam_size + 1]]
-
-            # this is worse, but somehow slightly more performant
-            # but I'm not using it anyway ;)
-            # largest = max(range(len(values)), key=values.__getitem__)
-            # v = queue.pop(largest)
-            # queue = queue[:beam_size]
 
             added_comp_ids.add(v)
             target.append(v)

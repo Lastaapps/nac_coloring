@@ -42,7 +42,7 @@ def _single_general_NAC_coloring(self) -> Optional[NACColoring]:
 
         # if there is only one component with all the edges,
         # the NAC coloring exists <=> this component has NAC coloring
-        return single_NAC_coloring(nx.Graph(self.subgraph(component)))
+        return single_NAC_coloring_impl(nx.Graph(self.subgraph(component)))
 
     if nx.algorithms.connectivity.node_connectivity(self) < 2:
         generator = nx.algorithms.biconnected_components(self)
