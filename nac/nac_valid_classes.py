@@ -12,7 +12,7 @@ from nac.util.union_find import UnionFind
 from nac.data_type import Edge
 
 
-class MonochromaticClassType(Enum):
+class NACValidClassType(Enum):
     """
     Represents the way monochromatic classes are found.
     """
@@ -22,7 +22,7 @@ class MonochromaticClassType(Enum):
     """Each triangle-connected component it its own monochromatic class."""
     TRIANGLES = "TRIANGLES"
     """Creates monochromatic classes according to the paper."""
-    MONOCHROMATIC = "MONOCHROMATIC"
+    EXTENDED = "MONOCHROMATIC"
 
 
 def _trivial_monochromatic_classes(
@@ -38,7 +38,7 @@ def _trivial_monochromatic_classes(
 
 def find_monochromatic_classes(
     graph: nx.Graph,
-    class_type: MonochromaticClassType = MonochromaticClassType.MONOCHROMATIC,
+    class_type: NACValidClassType = NACValidClassType.EXTENDED,
     is_cartesian_NAC_coloring: bool = False,
 ) -> Tuple[Dict[Edge, int], List[List[Edge]]]:
     """
@@ -54,7 +54,7 @@ def find_monochromatic_classes(
 
     Components are indexed from 0.
     """
-    if class_type == MonochromaticClassType.EDGES:
+    if class_type == NACValidClassType.EDGES:
         return _trivial_monochromatic_classes(graph)
 
     components = UnionFind[Edge]()
@@ -79,7 +79,7 @@ def find_monochromatic_classes(
     # that may produce disconnected components, as cycles may not exist!
     # There routines are highly inefficient, but the time is still
     # negligible compared to the main algorithm running time.
-    if class_type == MonochromaticClassType.MONOCHROMATIC:
+    if class_type == NACValidClassType.EXTENDED:
         # we try again until we find no other component to merge
         # new opinions may appear later
         # could be most probably implemented smarter

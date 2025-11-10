@@ -27,7 +27,7 @@ from tqdm import tqdm
 
 import nac as nac
 import nac.util
-from nac import MonochromaticClassType
+from nac import NACValidClassType
 
 import argparse
 
@@ -83,7 +83,7 @@ DIR = "./graphs_store/no_NAC_coloring"
 os.makedirs(DIR, exist_ok=True)
 
 
-def store_graph(graph: nx.Graph, class_type: MonochromaticClassType) -> None:
+def store_graph(graph: nx.Graph, class_type: NACValidClassType) -> None:
     vertex_no = graph.number_of_nodes()
     file_name = f"no_NAC_coloring-{vertex_no}-{class_type.name}.g6"
     bytes = nx.graph6.to_graph6_bytes(graph, header=False).strip()
@@ -128,7 +128,7 @@ def search_large_graph_no_NAC_coloring(
         classes_no = nac.find_monochromatic_classes(
             graph,
             # class_type=MonochromaticClassType.MONOCHROMATIC,
-            class_type=MonochromaticClassType.TRIANGLES,
+            class_type=NACValidClassType.TRIANGLES,
         )[1]
         # if not len(classes_no) > 10:
         if not len(classes_no) > 2 * np.sqrt(n):  # triangle-connected
@@ -143,7 +143,7 @@ def search_large_graph_no_NAC_coloring(
 
         # print(f"{classes_no}: {nx.graph6.to_graph6_bytes(graph, header=False).strip()}")
         counter_success.update()
-        store_graph(graph, MonochromaticClassType.TRIANGLES)
+        store_graph(graph, NACValidClassType.TRIANGLES)
 
 
 parser = create_parser()

@@ -7,7 +7,7 @@ from typing import *
 import networkx as nx
 
 from nac.data_type import NACColoring, LoopError
-from nac.monochromatic_classes import find_monochromatic_classes
+from nac.nac_valid_classes import find_monochromatic_classes
 
 
 def check_NAC_constrains(self: nx.Graph) -> bool:

@@ -124,13 +124,13 @@ class MeasurementResult:
     vertex_no: int
     edge_no: int
     triangle_components_no: int
-    monochromatic_classes_no: int
+    triangle_extended_classes_no: int
     relabel: str
     split: str
     merging: str
     subgraph_size: int
     use_smart_split: bool
-    used_monochromatic_classes: bool
+    used_triangle_extended_classes: bool
     nac_any_finished: bool
     nac_first_coloring_no: Optional[int]
     nac_first_mean_time: Optional[int]
@@ -155,13 +155,13 @@ class MeasurementResult:
             self.vertex_no,
             self.edge_no,
             self.triangle_components_no,
-            self.monochromatic_classes_no,
+            self.triangle_extended_classes_no,
             self.relabel,
             self.split,
             self.merging,
             self.subgraph_size,
             self.use_smart_split,
-            self.used_monochromatic_classes,
+            self.used_triangle_extended_classes,
             self.nac_any_finished,
             self.nac_first_coloring_no,
             self.nac_first_mean_time,
@@ -396,7 +396,7 @@ def nac_benchmark_core(
     rounds: int,
     first_only: bool,
     strategy: Tuple[str, str],
-    use_monochromatic_classes: bool,
+    use_triangle_extended_classes: bool,
     time_limit: int,
     seed: int | None = 42,
 ) -> MeasuredData:
@@ -405,10 +405,10 @@ def nac_benchmark_core(
     Returns results grouped by relabel, split, merge and subgraph size strategies
     """
 
-    if use_monochromatic_classes:
-        monochromatic_class_type = nac.MonochromaticClassType.MONOCHROMATIC
+    if use_triangle_extended_classes:
+        nac_valid_class_type = nac.NACValidClassType.EXTENDED
     else:
-        monochromatic_class_type = nac.MonochromaticClassType.TRIANGLES
+        nac_valid_class_type = nac.NACValidClassType.TRIANGLES
 
     result = MeasuredData(None, None)
     rand = random.Random(seed)
@@ -421,7 +421,7 @@ def nac_benchmark_core(
                 graph=graph,
                 algorithm=strategy[1],
                 relabel_strategy=strategy[0],
-                monochromatic_class_type=monochromatic_class_type,
+                nac_valid_class_type=nac_valid_class_type,
                 seed=rand.randint(0, 2**30),
             )
         )
@@ -477,8 +477,8 @@ def nac_benchmark_core(
 def create_measurement_result(
     graph: nx.Graph,
     dataset_name: str,
-    trianlge_classes: int,
-    monochromatic_classes: int,
+    trianlge_components: int,
+    extended_classes: int,
     nac_first: Optional[MeasuredRecord],
     nac_all: Optional[MeasuredRecord],
     relabel_strategy: str,
@@ -486,7 +486,7 @@ def create_measurement_result(
     merge_strategy: str,
     subgraph_size: int,
     use_smart_split: bool,
-    used_monochromatic_classes: bool,
+    used_triangle_extended_classes: bool,
     timestamp: datetime.datetime = datetime.datetime.now(datetime.UTC),
 ) -> MeasurementResult:
     """
@@ -505,14 +505,14 @@ def create_measurement_result(
         dataset=dataset_name,
         vertex_no=vertex_no,
         edge_no=edge_no,
-        triangle_components_no=trianlge_classes,
-        monochromatic_classes_no=monochromatic_classes,
+        triangle_components_no=trianlge_components,
+        triangle_extended_classes_no=extended_classes,
         relabel=relabel_strategy,
         split=split_strategy,
         merging=merge_strategy,
         subgraph_size=subgraph_size,
         use_smart_split=use_smart_split,
-        used_monochromatic_classes=used_monochromatic_classes,
+        used_triangle_extended_classes=used_triangle_extended_classes,
         nac_any_finished=nac_any_finished,
         nac_first_coloring_no=nac_first.coloring_no,
         nac_first_mean_time=nac_first.mean_time,
@@ -702,7 +702,7 @@ def export_figure_impl(
     # print(f"Exporting: {file_name}")
     fig.savefig(os.path.join(dir, file_name), format="pgf", bbox_inches="tight")
 
-def export_monochromatic_vs_triangle(
+def export_extended_classes_vs_triangle_components(
         fig: Figure,
         dataset: str,
         dir: str = FIGURES_DIR,
@@ -762,19 +762,30 @@ def trcon(short: bool = False) -> str:
     else:
         return base + "-conn."
 
+def trext(short: bool = False) -> str:
+    if LATEX_ENABLED:
+        base = r"$\triangle$"
+    else:
+        base = "△"
+
+    if not short:
+        return base + "-extended"
+    else:
+        return base + "-ext."
+
 ###############################################################################
-def plot_monochromatic_vs_triangle(df: pd.DataFrame, dataset: str | None = None, n: int = 10):
+def plot_extended_vs_original_triangle_components(df: pd.DataFrame, dataset: str | None = None, n: int = 10):
     """
-    Compares effectivness of △-connected components and monochromatic classes
+    Compares effectivness of △-extended classes and △-connected components
     """
     if dataset is not None:
         df = df.query(f"dataset == '{dataset}'")
     df = df
-    df = df.reset_index()[["graph", Columns.MONOCHROMATIC_CLASSES_NO, Columns.TRIANGLE_COMPONENTS_NO]].drop_duplicates().set_index("graph")
+    df = df.reset_index()[["graph", Columns.EXTENDED_CLASSES_NO, Columns.TRIANGLE_COMPONENTS_NO]].drop_duplicates().set_index("graph")
     graph_no = df.index.nunique()
     graph_no_bellow_monoch_n = df.query(f"monochromatic_classes_no < {n}").index.nunique()
     graph_no_bellow_triang_n = df.query(f"triangle_components_no < {n}").index.nunique()
-    print(f"Graphs with less then {n} Monochromatic classes: {graph_no_bellow_monoch_n}/{graph_no} ({graph_no_bellow_monoch_n/graph_no*100}%)")
+    print(f"Graphs with less then {n} △-extended classes: {graph_no_bellow_monoch_n}/{graph_no} ({graph_no_bellow_monoch_n/graph_no*100}%)")
     print(f"Graphs with less then {n} △-connected components: {graph_no_bellow_triang_n}/{graph_no} ({graph_no_bellow_triang_n/graph_no*100}%)")
 
     dist = 1+df[Columns.TRIANGLE_COMPONENTS_NO].max()-df[Columns.TRIANGLE_COMPONENTS_NO].min()
@@ -784,9 +795,9 @@ def plot_monochromatic_vs_triangle(df: pd.DataFrame, dataset: str | None = None,
         figsize=fig_size(DEFAULT_FIG_WIDTH//2, height_ratio=1),
     )
     ax = fig.subplots(1,1)
-    ax.hist(df[Columns.MONOCHROMATIC_CLASSES_NO], bins=dist, alpha=alpha, stacked=True, label="Monochromatic classes")
+    ax.hist(df[Columns.EXTENDED_CLASSES_NO], bins=dist, alpha=alpha, stacked=True, label=f"{trext()} classes")
     ax.hist(df[Columns.TRIANGLE_COMPONENTS_NO], bins=dist, alpha=alpha, stacked=True, label=f"{trcon()} components")
-    ax.set_xlabel(f"Number of m. classes or {trcon(short=True)} components")
+    ax.set_xlabel(f"Number of {trext(short=True)} classes or {trcon(short=True)} components")
     ax.set_ylabel("Number of graphs")
     ax.legend()
     if not LATEX_ENABLED and dataset:
@@ -864,7 +875,7 @@ def _group_and_plot(
         rename_based_on = {
             "vertex_no": "Vertices",
             "triangle_components_no": f"{trcon()} components",
-            "monochromatic_classes_no": "Monochromatic classes",
+            "monochromatic_classes_no": f"{trext()} classes",
         }
 
         # ax.set_title(f"{rename_based_on[x_column]} {based_on} ({aggregation})")
@@ -912,7 +923,7 @@ class Columns:
     ALL_CHECKS = "nac_all_check_cycle_mask"
 
     VERTEX_NO = "vertex_no"
-    MONOCHROMATIC_CLASSES_NO = "monochromatic_classes_no"
+    EXTENDED_CLASSES_NO = "monochromatic_classes_no"
     TRIANGLE_COMPONENTS_NO = "triangle_components_no"
 
     first = [FIRST_TIME, FIRST_CHECKS]
@@ -928,7 +939,7 @@ def plot_frame(
         Columns.ALL_CHECKS,
     ],
     ops_x_column=[
-        Columns.MONOCHROMATIC_CLASSES_NO,
+        Columns.EXTENDED_CLASSES_NO,
         Columns.VERTEX_NO,
     ],
     ops_based_on=[
@@ -1075,7 +1086,7 @@ def _plot_is_NAC_coloring_calls_groups(
     rename_based_on = {
         "vertex_no": "Vertices",
         "triangle_components_no": f"{trcon()} components",
-        "monochromatic_classes_no": "Monochromatic classes",
+        "monochromatic_classes_no": f"{trext()} classes",
     }
 
     # display(aggregated)
@@ -1165,27 +1176,27 @@ def plot_is_NAC_coloring_calls(
     rename_dict = {
         "exp_edge_no": "Naive - Edges",
         "exp_triangle_component_no": f"Naive - {trcon()} components",
-        "exp_monochromatic_class_no": "Naive - Monochromatic classes",
+        "exp_monochromatic_class_no": f"Naive - {trext()} classes",
         "nac_all_check_cycle_mask": "Subgraphs - CycleMask",
         "nac_all_check_is_NAC": "Subgraphs - IsNACColoring",
         "scaled_edge_no": "Naive - Edges",
         "scaled_triangle_component_no": f"Naive - {trcon()} components",
-        "scaled_monochromatic_class_no": "Naive - Monochromatic classes",
+        "scaled_monochromatic_class_no": f"Naive - {trext()} classes",
         "scaled_nac_all_check_cycle_mask": "Subgraphs - CycleMask",
         "inv_edge_no": "Naive - Edges",
         "inv_triangle_component_no": f"Naive - {trcon()} components",
-        "inv_monochromatic_class_no": "Naive - Monochromatic classes",
+        "inv_monochromatic_class_no": f"Naive - {trext()} classes",
         "inv_nac_all_check_cycle_mask": "Subgraphs - CycleMask",
         "inv_nac_all_check_is_NAC": "Subgraphs - IsNACColoring",
         "new_edge_no": "Naive - Edges",
         "new_triangle_component_no": f"Naive - {trcon()} components",
-        "new_monochromatic_class_no": "Naive - Monochromatic classes",
+        "new_monochromatic_class_no": f"Naive - {trext()} classes",
         "new_nac_all_check_cycle_mask": "Subgraphs - CycleMask",
         "new_nac_all_check_is_NAC": "Subgraphs - IsNACColoring",
     }
 
     ops_x_column = [
-        Columns.MONOCHROMATIC_CLASSES_NO,
+        Columns.EXTENDED_CLASSES_NO,
         Columns.VERTEX_NO,
     ]
     ops_value_groups = [

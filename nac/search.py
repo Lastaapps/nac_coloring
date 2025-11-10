@@ -33,8 +33,8 @@ from nac.algorithms import (
 from nac.util.repetable_iterator import RepeatableIterator
 
 from nac.data_type import NACColoring, Edge, NiceGraph
-from nac.monochromatic_classes import (
-    MonochromaticClassType,
+from nac.nac_valid_classes import (
+    NACValidClassType,
     find_monochromatic_classes,
     create_component_graph_from_components,
 )
@@ -322,7 +322,7 @@ def NAC_colorings_impl(
     relabel_strategy: str,
     use_decompositions: bool,
     is_cartesian: bool,
-    monochromatic_class_type: MonochromaticClassType,
+    monochromatic_class_type: NACValidClassType,
     remove_vertices_cnt: int,
     use_has_coloring_check: bool,
     seed: int | None,
@@ -471,7 +471,7 @@ def NAC_colorings(
     graph: nx.Graph,
     algorithm: str = "subgraphs",
     relabel_strategy: str = "none",
-    monochromatic_class_type: MonochromaticClassType = MonochromaticClassType.MONOCHROMATIC,
+    monochromatic_class_type: NACValidClassType = NACValidClassType.EXTENDED,
     use_decompositions: bool = True,
     remove_vertices_cnt: int = 0,
     use_has_coloring_check: bool = True,
@@ -494,7 +494,7 @@ def cartesian_NAC_colorings(
     graph: nx.Graph,
     algorithm: str = "subgraphs",
     relabel_strategy: str = "none",
-    monochromatic_class_type: MonochromaticClassType = MonochromaticClassType.MONOCHROMATIC,
+    monochromatic_class_type: NACValidClassType = NACValidClassType.EXTENDED,
     use_decompositions: bool = True,
     use_has_coloring_check: bool = True,
     seed: int | None = None,

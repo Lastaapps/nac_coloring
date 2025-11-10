@@ -14,8 +14,8 @@ from nac.util.union_find import UnionFind
 from nac.util.repetable_iterator import RepeatableIterator
 
 from nac.data_type import NACColoring, Edge
-from nac.monochromatic_classes import (
-    MonochromaticClassType,
+from nac.nac_valid_classes import (
+    NACValidClassType,
     find_monochromatic_classes,
     create_component_graph_from_components,
 )
