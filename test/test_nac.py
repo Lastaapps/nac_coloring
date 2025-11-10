@@ -52,7 +52,6 @@ NAC_SPLIT_GOOD = [
 ]
 
 
-# TODO move into PyRigi
 def ThreePrismPlusTriangleOnSide():
     """Return the 3-prism graph where there is extra triangle on one of the connecting edges."""
     return Graph(
@@ -72,7 +71,6 @@ def ThreePrismPlusTriangleOnSide():
     )
 
 
-# TODO move into PyRigi
 def DiamondWithZeroExtension():
     """
     Return the diamond graph with zero extension
@@ -83,7 +81,6 @@ def DiamondWithZeroExtension():
     )
 
 
-# TODO move into PyRigi
 def SquareGrid2D(w: int, h: int):
     """
     Creates a square grid with width and height given.
@@ -153,124 +150,6 @@ def test_sinlge_and_has_NAC_coloring(graph: nx.Graph, result: bool):
     assert result == nac.has_NAC_coloring(
         graph,
     )
-
-
-@pytest.mark.nac_test
-@pytest.mark.parametrize(
-    ("graph", "result"),
-    [
-        (
-            graphs.Path(3),
-            set(),
-        ),
-        (
-            graphs.Cycle(3),
-            set([(0, 1, 2)]),
-        ),
-        (
-            graphs.Cycle(4),
-            set([(0, 1, 2, 3)]),
-        ),
-        (
-            graphs.Cycle(5),
-            set([(0, 1, 2, 3, 4)]),
-        ),
-        (
-            graphs.Diamond(),
-            set([(0, 1, 2), (0, 2, 3)]),
-        ),
-        (
-            graphs.ThreePrism(),
-            set([(0, 1, 2), (3, 4, 5)]),
-        ),
-        (
-            graphs.ThreePrismPlusEdge(),
-            set([(0, 1, 2), (3, 4, 5), (0, 2, 5), (0, 3, 5)]),
-        ),
-        (
-            DiamondWithZeroExtension(),
-            set([(0, 1, 2), (0, 2, 3), (0, 1, 4, 3), (1, 2, 3, 4)]),
-        ),
-        (
-            Graph.from_vertices_and_edges(
-                [0, 1, 2, 3, 4, 5, 6, 7],
-                [
-                    (0, 1),
-                    (0, 5),
-                    (1, 3),
-                    (1, 7),
-                    (2, 3),
-                    (2, 4),
-                    (3, 7),
-                    (4, 5),
-                    (4, 6),
-                    (5, 6),
-                    (6, 7),
-                ],
-            ),
-            set([(1, 3, 7), (4, 5, 6), (2, 3, 7, 6, 4), (0, 1, 7, 6, 5)]),
-        ),
-        (
-            Graph.from_vertices_and_edges(
-                [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-                [
-                    (0, 1),
-                    (0, 5),
-                    (1, 6),
-                    (2, 3),
-                    (2, 4),
-                    (3, 5),
-                    (3, 8),
-                    (3, 10),
-                    (4, 6),
-                    (4, 7),
-                    (4, 9),
-                    (5, 8),
-                    (5, 10),
-                    (6, 7),
-                    (6, 9),
-                    (7, 8),
-                    (7, 9),
-                    (8, 10),
-                    (9, 10),
-                ],
-            ),
-            set(
-                [
-                    (4, 6, 9),
-                    (3, 5, 8),
-                    (4, 6, 7),
-                    (3, 5, 10),
-                    (2, 3, 8, 7, 4),
-                    (0, 1, 6, 7, 8, 5),
-                ]
-            ),
-        ),
-    ],
-    ids=[
-        "path",
-        "cycle3",
-        "cycle4",
-        "cycle5",
-        "diamond",
-        "prism",
-        "prismPlus",
-        "minimallyRigid",
-        "smaller_problemist",
-        "large_problemist",
-    ],
-)
-def test__find_cycles_in_component_graph(graph: nx.Graph, result: Set[Tuple]):
-    res = nac._find_cycles_in_component_graph(
-        nx.Graph(),
-        graph,
-        [],
-        from_angle_preserving_components=False,
-        all=True,
-    )
-    print(f"{res=}")
-    # TODO enable
-    # assert result == res
 
 
 @pytest.mark.nac_test

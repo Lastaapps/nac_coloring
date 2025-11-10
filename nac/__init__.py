@@ -12,7 +12,6 @@ from nac.entry import *
 from nac.core import canonical_NAC_coloring
 
 from nac.cycle_detection import (
-    _find_cycles_in_component_graph,
     _find_useful_cycles_for_components,
     _find_useful_cycles,
     _find_shortest_cycles_for_components,

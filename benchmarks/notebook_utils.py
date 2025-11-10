@@ -1061,7 +1061,6 @@ def _plot_is_NAC_coloring_calls_groups(
     value_columns: List[Literal["nac_first_mean_time", "nac_all_mean_time"]],
     aggregation: Literal["mean", "median", "3rd quartile"],
     legend_rename_dict: Dict[str, str] = {},
-    legend_outside: bool = False,
 ):
     df = df.loc[:, [x_column, *value_columns]]
     groupped = df.groupby([x_column])
@@ -1088,7 +1087,7 @@ def _plot_is_NAC_coloring_calls_groups(
     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
     ax.set_xlabel(rename_based_on[x_column])
     handles, labels = ax.get_legend_handles_labels()
-    if legend_outside:
+    if LATEX_ENABLED:
         ax.legend(
             handles,
             [legend_rename_dict[l] for l in labels],
