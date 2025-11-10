@@ -1007,8 +1007,8 @@ NAC_TEST_CASES: List[NACTestCase] = [
 @pytest.mark.parametrize(
     "class_type",
     [
-        nac.MonochromaticClassType.MONOCHROMATIC,
-        nac.MonochromaticClassType.TRIANGLES,
+        nac.NACValidClassType.EXTENDED,
+        nac.NACValidClassType.TRIANGLES,
     ],
 )
 def test_all_NAC_colorings(
@@ -1017,7 +1017,7 @@ def test_all_NAC_colorings(
     algorithm: str,
     relabel_strategy: str,
     use_decompositions: bool,
-    class_type: nac.MonochromaticClassType,
+    class_type: nac.NACValidClassType,
 ):
     # print(f"\nTested graph: {graph=}")
     # print(nx.nx_agraph.to_agraph(graph))
@@ -1027,7 +1027,7 @@ def test_all_NAC_colorings(
             graph,
             algorithm=algorithm,
             relabel_strategy=relabel_strategy,
-            monochromatic_class_type=class_type,
+            nac_valid_class_type=class_type,
             use_decompositions=use_decompositions,
             use_has_coloring_check=False,
             seed=42,  # this is potentially dangerous
@@ -1153,8 +1153,8 @@ def test__check_for_simple_stable_cut(graph: nx.Graph, coloring: Optional[NACCol
 @pytest.mark.parametrize(
     "class_type",
     [
-        nac.MonochromaticClassType.MONOCHROMATIC,
-        nac.MonochromaticClassType.TRIANGLES,
+        nac.NACValidClassType.EXTENDED,
+        nac.NACValidClassType.TRIANGLES,
     ],
 )
 @pytest.mark.skip(
@@ -1166,7 +1166,7 @@ def test_all_cartesian_NAC_colorings(
     algorithm: str,
     relabel_strategy: str,
     use_decompositions: bool,
-    class_type: nac.MonochromaticClassType,
+    class_type: nac.NACValidClassType,
 ):
     # print(f"\nTested graph: {graph=}")
     coloring_list = list(
@@ -1379,7 +1379,6 @@ def test_fuzzy_NAC_coloring(
             nac.NAC_colorings(
                 graph=graph,
                 algorithm=reference_algorithm,
-                remove_vertices_cnt=0,
                 # without this naive search is really slow
                 # use_chromatic_partitions=False,
                 use_decompositions=False,
