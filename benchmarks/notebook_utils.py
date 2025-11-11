@@ -84,36 +84,84 @@ class LazyList[T](List[T]):
 
 
 ###############################################################################
-COLUMNS: List[str] = [
-    "timestamp",
-    "graph",
-    "dataset",
-    "vertex_no",
-    "edge_no",
-    "triangle_components_no",
-    "monochromatic_classes_no",
-    "relabel",
-    "split",
-    "merging",
-    "subgraph_size",
-    "use_smart_split",
-    "used_monochromatic_classes",
-    "nac_any_finished",
-    "nac_first_coloring_no",
-    "nac_first_mean_time",
-    "nac_first_rounds",
-    "nac_first_check_is_NAC",
-    "nac_first_check_cycle_mask",
-    "nac_first_merge",
-    "nac_first_merge_no_common_vertex",
-    "nac_all_coloring_no",
-    "nac_all_mean_time",
-    "nac_all_rounds",
-    "nac_all_check_is_NAC",
-    "nac_all_check_cycle_mask",
-    "nac_all_merge",
-    "nac_all_merge_no_common_vertex",
-]
+from typing import List
+
+class Columns:
+
+    TIMESTAMP = "timestamp"
+    GRAPH = "graph"
+    DATASET = "dataset"
+    VERTEX_NUM = "vertex_num"
+    EDGE_NUM = "edge_num"
+    TRIANGLE_COMPONENTS_NUM = "triangle_components_num"
+    EXTENDED_CLASSES_NUM = "extended_classes_num"
+    RELABEL = "relabel"
+    SPLIT = "split"
+    MERGING = "merging"
+    SUBGRAPH_SIZE = "subgraph_size"
+    USE_SMART_SPLIT = "use_smart_split"
+    USED_EXTENDED_CLASSES = "used_extended_classes"
+    ANY_FINISHED = "nac_any_finished"
+    FIRST_COLORING_NUM = "nac_first_coloring_num"
+    FIRST_MEAN_TIME = "nac_first_mean_time"
+    FIRST_ROUNDS = "nac_first_rounds"
+    FIRST_CHECK_IS_NAC = "nac_first_check_is_NAC"
+    FIRST_CHECKS = "nac_first_check_cycle_mask"
+    FIRST_MERGE = "nac_first_merge"
+    FIRST_MERGE_NO_COMMON_VERTEX = "nac_first_merge_no_common_vertex"
+    ALL_COLORING_NUM = "nac_all_coloring_num"
+    ALL_MEAN_TIME = "nac_all_mean_time"
+    ALL_ROUNDS = "nac_all_rounds"
+    ALL_CHECK_IS_NAC = "nac_all_check_is_NAC"
+    ALL_CHECKS = "nac_all_check_cycle_mask"
+    ALL_MERGE = "nac_all_merge"
+    ALL_MERGE_NO_COMMON_VERTEX = "nac_all_merge_no_common_vertex"
+
+    first: list[str] = [FIRST_MEAN_TIME, FIRST_CHECKS]
+    all: list[str] = [ALL_MEAN_TIME, ALL_CHECKS]
+
+    ALL: list[str] = [
+        TIMESTAMP,
+        GRAPH,
+        DATASET,
+        VERTEX_NUM,
+        EDGE_NUM,
+        TRIANGLE_COMPONENTS_NUM,
+        EXTENDED_CLASSES_NUM,
+        RELABEL,
+        SPLIT,
+        MERGING,
+        SUBGRAPH_SIZE,
+        USE_SMART_SPLIT,
+        USED_EXTENDED_CLASSES,
+        ANY_FINISHED,
+        FIRST_COLORING_NUM,
+        FIRST_MEAN_TIME,
+        FIRST_ROUNDS,
+        FIRST_CHECK_IS_NAC,
+        FIRST_CHECKS,
+        FIRST_MERGE,
+        FIRST_MERGE_NO_COMMON_VERTEX,
+        ALL_COLORING_NUM,
+        ALL_MEAN_TIME,
+        ALL_ROUNDS,
+        ALL_CHECK_IS_NAC,
+        ALL_CHECKS,
+        ALL_MERGE,
+        ALL_MERGE_NO_COMMON_VERTEX,
+    ]
+    identifying = [
+        GRAPH,
+        DATASET,
+        SPLIT,
+        RELABEL,
+        MERGING,
+        SUBGRAPH_SIZE,
+        USE_SMART_SPLIT,
+        USED_EXTENDED_CLASSES,
+    ]
+
+COLUMNS: list[str] = Columns.ALL
 
 
 @dataclass
@@ -121,10 +169,10 @@ class MeasurementResult:
     timestamp: datetime.datetime
     graph: str
     dataset: str
-    vertex_no: int
-    edge_no: int
-    triangle_components_no: int
-    triangle_extended_classes_no: int
+    vertex_num: int
+    edge_num: int
+    triangle_components_num: int
+    triangle_extended_classes_num: int
     relabel: str
     split: str
     merging: str
@@ -132,14 +180,14 @@ class MeasurementResult:
     use_smart_split: bool
     used_triangle_extended_classes: bool
     nac_any_finished: bool
-    nac_first_coloring_no: Optional[int]
+    nac_first_coloring_num: Optional[int]
     nac_first_mean_time: Optional[int]
     nac_first_rounds: Optional[int]
     nac_first_check_is_NAC: Optional[int]
     nac_first_check_cycle_mask: Optional[int]
     nac_first_merge: Optional[int]
     nac_first_merge_no_common_vertex: Optional[int]
-    nac_all_coloring_no: Optional[int]
+    nac_all_coloring_num: Optional[int]
     nac_all_mean_time: Optional[int]
     nac_all_rounds: Optional[int]
     nac_all_check_is_NAC: Optional[int]
@@ -152,10 +200,10 @@ class MeasurementResult:
             self.timestamp,
             self.graph,
             self.dataset,
-            self.vertex_no,
-            self.edge_no,
-            self.triangle_components_no,
-            self.triangle_extended_classes_no,
+            self.vertex_num,
+            self.edge_num,
+            self.triangle_components_num,
+            self.triangle_extended_classes_num,
             self.relabel,
             self.split,
             self.merging,
@@ -163,14 +211,14 @@ class MeasurementResult:
             self.use_smart_split,
             self.used_triangle_extended_classes,
             self.nac_any_finished,
-            self.nac_first_coloring_no,
+            self.nac_first_coloring_num,
             self.nac_first_mean_time,
             self.nac_first_rounds,
             self.nac_first_check_is_NAC,
             self.nac_first_check_cycle_mask,
             self.nac_first_merge,
             self.nac_first_merge_no_common_vertex,
-            self.nac_all_coloring_no,
+            self.nac_all_coloring_num,
             self.nac_all_mean_time,
             self.nac_all_rounds,
             self.nac_all_check_is_NAC,
@@ -278,7 +326,7 @@ def store_results(
     path = os.path.join(dir, file_name)
 
     # Filter out outliers (over 60s) that run when I put my laptor into sleep mode
-    df = df.query("nac_all_mean_time < 60_000 and nac_first_mean_time < 60_000")
+    df = df.query(f"{Columns.ALL_MEAN_TIME} < 60_000 and {Columns.FIRST_MEAN_TIME} < 60_000")
 
     df.to_csv(path, header=True, index=False)
     return file_name
@@ -303,18 +351,7 @@ def update_stored_data(
             new_df = new_df[~(new_df.isna().any(axis=1))]
 
         df = pd.concat((df, new_df))
-    df = df.drop_duplicates(
-        subset=[
-            "graph",
-            "dataset",
-            "split",
-            "relabel",
-            "merging",
-            "subgraph_size",
-            "used_monochromatic_classes",
-        ],
-        keep="last",
-    )
+    df = df.drop_duplicates( subset=Columns.identifying, keep="last")
     store_results(df)
     return df
 
@@ -503,10 +540,10 @@ def create_measurement_result(
         timestamp=timestamp,
         graph=graph_to_id(graph),
         dataset=dataset_name,
-        vertex_no=vertex_no,
-        edge_no=edge_no,
-        triangle_components_no=trianlge_components,
-        triangle_extended_classes_no=extended_classes,
+        vertex_num=vertex_no,
+        edge_num=edge_no,
+        triangle_components_num=trianlge_components,
+        triangle_extended_classes_num=extended_classes,
         relabel=relabel_strategy,
         split=split_strategy,
         merging=merge_strategy,
@@ -514,14 +551,14 @@ def create_measurement_result(
         use_smart_split=use_smart_split,
         used_triangle_extended_classes=used_triangle_extended_classes,
         nac_any_finished=nac_any_finished,
-        nac_first_coloring_no=nac_first.coloring_no,
+        nac_first_coloring_num=nac_first.coloring_no,
         nac_first_mean_time=nac_first.mean_time,
         nac_first_rounds=nac_first.rounds,
         nac_first_check_is_NAC=nac_first.checks_is_NAC,
         nac_first_check_cycle_mask=nac_first.checks_cycle_mask,
         nac_first_merge=nac_first.merge,
         nac_first_merge_no_common_vertex=nac_first.merge_no_common_vetex,
-        nac_all_coloring_no=nac_all.coloring_no,
+        nac_all_coloring_num=nac_all.coloring_no,
         nac_all_mean_time=nac_all.mean_time,
         nac_all_rounds=nac_all.rounds,
         nac_all_check_is_NAC=nac_all.checks_is_NAC,
@@ -552,7 +589,7 @@ def filter_graphs_that_finished_for_all_strategies(df: pd.DataFrame) -> pd.Serie
     """
     Keep only graphs where all the tested strategies finished
     """
-    all_strategies_groups = df[["nac_any_finished"]].groupby("graph")
+    all_strategies_groups = df[[Columns.ANY_FINISHED]].groupby(Columns.GRAPH)
     all_strategies_finished = all_strategies_groups.all()
     return all_strategies_finished[all_strategies_finished == True].index.unique()
 
@@ -570,7 +607,7 @@ def finished_graphs_no_naive(df: pd.DataFrame) -> pd.DataFrame:
     """
     return df.loc[
         filter_graphs_that_finished_for_all_strategies(
-            df.query("split != 'naive-cycles'")
+            df.query(f"{Columns.SPLIT} != 'naive-cycles'")
         )
     ]
 
@@ -584,8 +621,8 @@ def replace_failed_results(
     """
     # Chooses the expected time that was actually used
     if replace_with is None:
-        max_runtime = df.query("nac_any_finished == True")[
-            ["nac_first_mean_time", "nac_all_mean_time"]
+        max_runtime = df.query(f"{Columns.ANY_FINISHED} == True")[
+            [Columns.FIRST_MEAN_TIME, Columns.ALL_MEAN_TIME]
         ].max(axis=None)
         if max_runtime > 25_000:
             replace_with = 5_000
@@ -593,16 +630,16 @@ def replace_failed_results(
             replace_with = ((max_runtime + 4_999) // 5_000) * 5_000
 
     df = df.copy()
-    df_failed = df["nac_any_finished"] == False
+    df_failed = df[Columns.ANY_FINISHED] == False
     df[NAC_DUMMY_MEAN_TIME_USED] = False
     df.loc[df_failed, NAC_DUMMY_MEAN_TIME_USED] = True
-    df.loc[df_failed, "nac_first_mean_time"] = replace_with
-    df.loc[df_failed, "nac_all_mean_time"] = replace_with
-    df.loc[df_failed, "nac_first_check_cycle_mask"] = (
+    df.loc[df_failed, Columns.FIRST_MEAN_TIME] = replace_with
+    df.loc[df_failed, Columns.ALL_MEAN_TIME] = replace_with
+    df.loc[df_failed, Columns.FIRST_CHECKS] = (
         0  # these results will be automatically filtered out
     )
-    df.loc[df_failed, "nac_all_check_cycle_mask"] = 0
-    df.loc[df_failed, "nac_any_finished"] = True
+    df.loc[df_failed, Columns.ALL_CHECKS] = 0
+    df.loc[df_failed, Columns.ANY_FINISHED] = True
     return df
 
 
@@ -675,9 +712,9 @@ def export_figure(
         else fig.value_column
     )
     groupped_by = {
-        "vertex_no": "vertex",
-        "monochromatic_classes_no": "monochromatic",
-        "triangle_components_no": "triangle",
+        Columns.VERTEX_NUM: "vertex",
+        Columns.EXTENDED_CLASSES_NUM: "monochromatic",
+        Columns.TRIANGLE_COMPONENTS_NUM: "triangle",
     }[fig.x_column]
     metric = "runtime" if "time" in fig.value_column else "checks"
     kind = fig.based_on
@@ -779,24 +816,24 @@ def plot_extended_vs_original_triangle_components(df: pd.DataFrame, dataset: str
     Compares effectivness of △-extended classes and △-connected components
     """
     if dataset is not None:
-        df = df.query(f"dataset == '{dataset}'")
+        df = df.query(f"{Columns.DATASET} == '{dataset}'")
     df = df
-    df = df.reset_index()[["graph", Columns.EXTENDED_CLASSES_NO, Columns.TRIANGLE_COMPONENTS_NO]].drop_duplicates().set_index("graph")
+    df = df.reset_index()[[Columns.GRAPH, Columns.EXTENDED_CLASSES_NUM, Columns.TRIANGLE_COMPONENTS_NUM]].drop_duplicates().set_index(Columns.GRAPH)
     graph_no = df.index.nunique()
-    graph_no_bellow_monoch_n = df.query(f"monochromatic_classes_no < {n}").index.nunique()
-    graph_no_bellow_triang_n = df.query(f"triangle_components_no < {n}").index.nunique()
+    graph_no_bellow_monoch_n = df.query(f"{Columns.EXTENDED_CLASSES_NUM} < {n}").index.nunique()
+    graph_no_bellow_triang_n = df.query(f"{Columns.TRIANGLE_COMPONENTS_NUM} < {n}").index.nunique()
     print(f"Graphs with less then {n} △-extended classes: {graph_no_bellow_monoch_n}/{graph_no} ({graph_no_bellow_monoch_n/graph_no*100}%)")
     print(f"Graphs with less then {n} △-connected components: {graph_no_bellow_triang_n}/{graph_no} ({graph_no_bellow_triang_n/graph_no*100}%)")
 
-    dist = 1+df[Columns.TRIANGLE_COMPONENTS_NO].max()-df[Columns.TRIANGLE_COMPONENTS_NO].min()
+    dist = 1+df[Columns.TRIANGLE_COMPONENTS_NUM].max()-df[Columns.TRIANGLE_COMPONENTS_NUM].min()
     dist = (dist+3)//4
     alpha = 0.6
     fig = figure(
         figsize=fig_size(DEFAULT_FIG_WIDTH//2, height_ratio=1),
     )
     ax = fig.subplots(1,1)
-    ax.hist(df[Columns.EXTENDED_CLASSES_NO], bins=dist, alpha=alpha, stacked=True, label=f"{trext()} classes")
-    ax.hist(df[Columns.TRIANGLE_COMPONENTS_NO], bins=dist, alpha=alpha, stacked=True, label=f"{trcon()} components")
+    ax.hist(df[Columns.EXTENDED_CLASSES_NUM], bins=dist, alpha=alpha, stacked=True, label=f"{trext()} classes")
+    ax.hist(df[Columns.TRIANGLE_COMPONENTS_NUM], bins=dist, alpha=alpha, stacked=True, label=f"{trcon()} components")
     ax.set_xlabel(f"Number of {trext(short=True)} classes or {trcon(short=True)} components")
     ax.set_ylabel("Number of graphs")
     ax.legend()
@@ -873,9 +910,9 @@ def _group_and_plot(
                 ax.plot(data.index, data[value_column], label=title)
 
         rename_based_on = {
-            "vertex_no": "Vertices",
-            "triangle_components_no": f"{trcon()} components",
-            "monochromatic_classes_no": f"{trext()} classes",
+            Columns.VERTEX_NUM: "Vertices",
+            Columns.TRIANGLE_COMPONENTS_NUM: f"{trcon()} components",
+            Columns.EXTENDED_CLASSES_NUM: f"{trext()} classes",
         }
 
         # ax.set_title(f"{rename_based_on[x_column]} {based_on} ({aggregation})")
@@ -916,39 +953,26 @@ def _group_and_plot(
                 labels,
             )
 
-class Columns:
-    FIRST_TIME = "nac_first_mean_time"
-    FIRST_CHECKS = "nac_first_check_cycle_mask"
-    ALL_TIME = "nac_all_mean_time"
-    ALL_CHECKS = "nac_all_check_cycle_mask"
-
-    VERTEX_NO = "vertex_no"
-    EXTENDED_CLASSES_NO = "monochromatic_classes_no"
-    TRIANGLE_COMPONENTS_NO = "triangle_components_no"
-
-    first = [FIRST_TIME, FIRST_CHECKS]
-    all = [ALL_TIME, ALL_CHECKS]
-
 def plot_frame(
     title: str,
     df: pd.DataFrame,
     ops_value_columns_sets: List[str | List[str]]=[
-        Columns.FIRST_TIME,
+        Columns.FIRST_MEAN_TIME,
         Columns.FIRST_CHECKS,
-        Columns.ALL_TIME,
+        Columns.ALL_MEAN_TIME,
         Columns.ALL_CHECKS,
     ],
     ops_x_column=[
-        Columns.EXTENDED_CLASSES_NO,
-        Columns.VERTEX_NO,
+        Columns.EXTENDED_CLASSES_NUM,
+        Columns.VERTEX_NUM,
     ],
     ops_based_on=[
-        # "relabel",
-        # "split",
-        # "merging",
+        # Columns.RELABEL,
+        # Columns.SPLIT,
+        # Columns.MERGING,
         "split_merging",
-        # "use_smart_split",
-        # "subgraph_size",
+        # Columns.USE_SMART_SPLIT,
+        # Columns.SUBGRAPH_SIZE,
     ],
     ops_aggregation=[
         "mean",
@@ -982,17 +1006,17 @@ def plot_frame(
     ops_value_columns_sets = [[item,] if isinstance(item, str) else list(item) for item in ops_value_columns_sets]
 
     title_rename = {
-        "nac_first_mean_time": "First NAC-coloring, Runtime",
-        "nac_first_check_cycle_mask": "First NAC-coloring, Checks number",
-        "nac_all_mean_time": "All NAC-colorings, Runtime",
-        "nac_all_check_cycle_mask": "All NAC-colorings, Checks number",
+        Columns.FIRST_MEAN_TIME: "First NAC-coloring, Runtime",
+        Columns.FIRST_CHECKS: "First NAC-coloring, Checks number",
+        Columns.ALL_MEAN_TIME: "All NAC-colorings, Runtime",
+        Columns.ALL_CHECKS: "All NAC-colorings, Checks number",
     }
 
     for value_columns in ops_value_columns_sets:
         local_df = df[(df[value_columns] != 0).all(axis=1)]
 
         if filter_out_exhaustive_mergin_strategies_for_first and "first" in value_columns[0]:
-            local_df = local_df.query("merging != 'sorted_size' and merging != 'score'")
+            local_df = local_df.query(f"{Columns.MERGING} != 'sorted_size' and {Columns.MERGING} != 'score'")
 
         if local_df.shape[0] == 0:
             continue
@@ -1084,9 +1108,9 @@ def _plot_is_NAC_coloring_calls_groups(
             aggregated = groupped.quantile(0.75)
 
     rename_based_on = {
-        "vertex_no": "Vertices",
-        "triangle_components_no": f"{trcon()} components",
-        "monochromatic_classes_no": f"{trext()} classes",
+        Columns.VERTEX_NUM: "Vertices",
+        Columns.TRIANGLE_COMPONENTS_NUM: f"{trcon()} components",
+        Columns.EXTENDED_CLASSES_NUM: f"{trext()} classes",
     }
 
     # display(aggregated)
@@ -1118,104 +1142,104 @@ def plot_is_NAC_coloring_calls(
 ) -> List[Figure]:
     figs = []
 
-    df = df.query("nac_all_coloring_no != 0").copy()
+    df = df.query(f"{Columns.ALL_COLORING_NUM} != 0").copy()
     print(f"Plotting {df.shape[0]} records...")
 
     related_columns = [
-        "vertex_no",
-        "edge_no",
-        "triangle_components_no",
-        "monochromatic_classes_no",
-        "nac_all_coloring_no",
-        "nac_all_check_is_NAC",
-        "nac_all_check_cycle_mask",
+        Columns.VERTEX_NUM,
+        Columns.EDGE_NUM,
+        Columns.TRIANGLE_COMPONENTS_NUM,
+        Columns.EXTENDED_CLASSES_NUM,
+        Columns.ALL_COLORING_NUM,
+        Columns.ALL_CHECK_IS_NAC,
+        Columns.ALL_CHECKS,
     ]
     df = df.loc[:, related_columns]
     # this does not help our algorithm to stand out, but the graphs can be drawn more easily
 
-    df["exp_edge_no"] = 2 ** (df["edge_no"] - 1)
-    df["exp_triangle_component_no"] = 2 ** (df["triangle_components_no"] - 1)
-    df["exp_monochromatic_class_no"] = 2 ** (df["monochromatic_classes_no"] - 1)
+    df["exp_edge_num"] = 2 ** (df[Columns.EDGE_NUM] - 1)
+    df["exp_triangle_component_num"] = 2 ** (df[Columns.TRIANGLE_COMPONENTS_NUM] - 1)
+    df["exp_monochromatic_class_num"] = 2 ** (df[Columns.EXTENDED_CLASSES_NUM] - 1)
 
-    df["scaled_edge_no"] = df["edge_no"] / df["nac_all_coloring_no"]
-    df["scaled_triangle_component_no"] = (
-        df["triangle_components_no"] / df["nac_all_coloring_no"]
+    df["scaled_edge_num"] = df[Columns.EDGE_NUM] / df[Columns.ALL_COLORING_NUM]
+    df["scaled_triangle_component_num"] = (
+        df[Columns.TRIANGLE_COMPONENTS_NUM] / df[Columns.ALL_COLORING_NUM]
     )
-    df["scaled_monochromatic_class_no"] = (
-        df["monochromatic_classes_no"] / df["nac_all_coloring_no"]
+    df["scaled_monochromatic_class_num"] = (
+        df[Columns.EXTENDED_CLASSES_NUM] / df[Columns.ALL_COLORING_NUM]
     )
     df["scaled_nac_all_check_cycle_mask"] = (
-        df["nac_all_check_cycle_mask"] / df["nac_all_coloring_no"]
+        df[Columns.ALL_CHECKS] / df[Columns.ALL_COLORING_NUM]
     )
 
-    df["inv_edge_no"] = df["nac_all_coloring_no"] / df["edge_no"]
-    df["inv_triangle_component_no"] = (
-        df["nac_all_coloring_no"] / df["triangle_components_no"]
+    df["inv_edge_num"] = df[Columns.ALL_COLORING_NUM] / df[Columns.EDGE_NUM]
+    df["inv_triangle_component_num"] = (
+        df[Columns.ALL_COLORING_NUM] / df[Columns.TRIANGLE_COMPONENTS_NUM]
     )
-    df["inv_monochromatic_class_no"] = (
-        df["nac_all_coloring_no"] / df["monochromatic_classes_no"]
+    df["inv_monochromatic_class_num"] = (
+        df[Columns.ALL_COLORING_NUM] / df[Columns.EXTENDED_CLASSES_NUM]
     )
     df["inv_nac_all_check_cycle_mask"] = (
-        df["nac_all_coloring_no"] / df["nac_all_check_cycle_mask"]
+        df[Columns.ALL_COLORING_NUM] / df[Columns.ALL_CHECKS]
     )
     df["inv_nac_all_check_is_NAC"] = (
-        df["nac_all_coloring_no"] / df["nac_all_check_is_NAC"]
+        df[Columns.ALL_COLORING_NUM] / df[Columns.ALL_CHECK_IS_NAC]
     )
 
-    df["new_edge_no"] = df["edge_no"] / df["exp_monochromatic_class_no"]
-    df["new_triangle_component_no"] = (
-        df["triangle_components_no"] / df["exp_monochromatic_class_no"]
+    df["new_edge_num"] = df[Columns.EDGE_NUM] / df["exp_monochromatic_class_num"]
+    df["new_triangle_component_num"] = (
+        df[Columns.TRIANGLE_COMPONENTS_NUM] / df["exp_monochromatic_class_num"]
     )
-    df["new_monochromatic_class_no"] = (
-        df["monochromatic_classes_no"] / df["exp_monochromatic_class_no"]
+    df["new_monochromatic_class_num"] = (
+        df[Columns.EXTENDED_CLASSES_NUM] / df["exp_monochromatic_class_num"]
     )
     df["new_nac_all_check_cycle_mask"] = (
-        df["nac_all_check_cycle_mask"] / df["exp_monochromatic_class_no"]
+        df[Columns.ALL_CHECKS] / df["exp_monochromatic_class_num"]
     )
 
     rename_dict = {
-        "exp_edge_no": "Naive - Edges",
-        "exp_triangle_component_no": f"Naive - {trcon()} components",
-        "exp_monochromatic_class_no": f"Naive - {trext()} classes",
+        "exp_edge_num": "Naive - Edges",
+        "exp_triangle_component_num": f"Naive - {trcon()} components",
+        "exp_monochromatic_class_num": f"Naive - {trext()} classes",
         "nac_all_check_cycle_mask": "Subgraphs - CycleMask",
         "nac_all_check_is_NAC": "Subgraphs - IsNACColoring",
-        "scaled_edge_no": "Naive - Edges",
-        "scaled_triangle_component_no": f"Naive - {trcon()} components",
-        "scaled_monochromatic_class_no": f"Naive - {trext()} classes",
+        "scaled_edge_num": "Naive - Edges",
+        "scaled_triangle_component_num": f"Naive - {trcon()} components",
+        "scaled_monochromatic_class_num": f"Naive - {trext()} classes",
         "scaled_nac_all_check_cycle_mask": "Subgraphs - CycleMask",
-        "inv_edge_no": "Naive - Edges",
-        "inv_triangle_component_no": f"Naive - {trcon()} components",
-        "inv_monochromatic_class_no": f"Naive - {trext()} classes",
+        "inv_edge_num": "Naive - Edges",
+        "inv_triangle_component_num": f"Naive - {trcon()} components",
+        "inv_monochromatic_class_num": f"Naive - {trext()} classes",
         "inv_nac_all_check_cycle_mask": "Subgraphs - CycleMask",
         "inv_nac_all_check_is_NAC": "Subgraphs - IsNACColoring",
-        "new_edge_no": "Naive - Edges",
-        "new_triangle_component_no": f"Naive - {trcon()} components",
-        "new_monochromatic_class_no": f"Naive - {trext()} classes",
+        "new_edge_num": "Naive - Edges",
+        "new_triangle_component_num": f"Naive - {trcon()} components",
+        "new_monochromatic_class_num": f"Naive - {trext()} classes",
         "new_nac_all_check_cycle_mask": "Subgraphs - CycleMask",
         "new_nac_all_check_is_NAC": "Subgraphs - IsNACColoring",
     }
 
     ops_x_column = [
-        Columns.EXTENDED_CLASSES_NO,
-        Columns.VERTEX_NO,
+        Columns.EXTENDED_CLASSES_NUM,
+        Columns.VERTEX_NUM,
     ]
     ops_value_groups = [
         [
-            "exp_edge_no",
-            "exp_triangle_component_no",
-            "exp_monochromatic_class_no",
+            "exp_edge_num",
+            "exp_triangle_component_num",
+            "exp_monochromatic_class_num",
             "nac_all_check_cycle_mask",
             "nac_all_check_is_NAC",
         ],
-        # ["scaled_edge_no", "scaled_triangle_component_no", "scaled_monochromatic_class_no", "scaled_nac_all_check_cycle_mask"],
+        # ["scaled_edge_num", "scaled_triangle_component_num", "scaled_monochromatic_class_num", "scaled_nac_all_check_cycle_mask"],
         [
-            "inv_edge_no",
-            "inv_triangle_component_no",
-            "inv_monochromatic_class_no",
+            "inv_edge_num",
+            "inv_triangle_component_num",
+            "inv_monochromatic_class_num",
             "inv_nac_all_check_cycle_mask",
             "inv_nac_all_check_is_NAC",
         ],
-        # ["new_edge_no",    "new_triangle_component_no",    "new_monochromatic_class_no",    "new_nac_all_check_cycle_mask" ],
+        # ["new_edge_num",    "new_triangle_component_num",    "new_monochromatic_class_num",    "new_nac_all_check_cycle_mask" ],
     ]
     ops_aggregation = [
         "mean",

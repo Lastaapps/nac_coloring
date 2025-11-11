@@ -78,12 +78,12 @@ LAMAN_DEGREE_3_PLUS_ALL_FILENAME = "D3LamanGraphs{}.m"
 
 
 def load_minimally_rigid_all(
-    vertices_no: int,
+    vertices_num: int,
     DIR: str = LAMAN_ALL_DIR,
     FILENAME: str | None = None,
 ) -> Iterable[nx.Graph]:
     if FILENAME is None:
-        FILENAME = LAMAN_ALL_FILENAME.format(vertices_no)
+        FILENAME = LAMAN_ALL_FILENAME.format(vertices_num)
     path = os.path.join(DIR, FILENAME)
     # this reads all the graphs and consumes to much memory
     # return nx.read_graph6(path)
