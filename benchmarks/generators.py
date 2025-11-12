@@ -3,19 +3,18 @@ This modules is used to generate and store random graphs of the given class.
 There graphs can later be loaded using the dataset module
 """
 
+import math
 import os
 import random
-import math
-from typing import *
 from pathlib import Path
+from typing import *
 
 import networkx as nx
 from tqdm import tqdm
 
-import networkx as nx
 import nac
-from nac import NiceGraph as Graph
 from benchmarks import datasets
+from nac import NiceGraph as Graph
 
 
 class RangeWithCount(NamedTuple):
@@ -127,6 +126,29 @@ def generate_random_globally_rigid_nac_critical_graphs(
     )
 
 
+def generate_threshold_globally_rigid_graphs(
+    dir: str = os.path.join(datasets.DIR_RANDOM, "globally_rigid_threshold"),
+    filename_template: str = "globally_rigid_threshold_{0}",
+    seed: int | None = 42,
+) -> List[Tuple[int, List[nx.Graph]]]:
+    ranges = (
+        RangeWithCount(10, 20, 100),
+        RangeWithCount(20, 30, 100),
+        RangeWithCount(30, 40, 100),
+        RangeWithCount(40, 50, 100),
+        RangeWithCount(50, 60, 100),
+        RangeWithCount(60, 70, 100),
+        RangeWithCount(70, 80, 100),
+    )
+    return _generate_random_graphs_impl(
+        ranges,
+        lambda n, seed: _generate_threshold_globally_rigid_graph(n, seed),
+        dir,
+        filename_template,
+        seed,
+    )
+
+
 ################################################################################
 # Generate a single graph of the given class
 ################################################################################
@@ -199,6 +221,67 @@ def _generate_NAC_critical_globally_rigid_graph(
     rand = random.Random(seed)
 
     p = (2 * math.log(n, log_base) / (n * n)) ** (1 / 3)
+    while True:
+        graph = pyrigi.Graph(
+            nx.fast_gnp_random_graph(n, p, seed=rand.randint(0, 2**30))
+        )
+        if not nx.is_connected(graph):
+            continue
+        if len(nac.find_monochromatic_classes(graph)[1]) == 1:
+            continue
+        if not graph.is_globally_rigid():
+            continue
+
+        return graph
+
+
+def _generate_threshold_rigid_graph(
+    n: int,
+    seed: int | None,
+    log_base: float = math.e,
+) -> nx.Graph:
+    """
+    Generates globally rigid graphs.
+
+    Uses bound from Theorem 4.4 from
+    The 2-Dimensional Rigidity of Certain Families of Graphs, 2006
+    Bill Jackson, Brigitte Servatius, and Herman Servatius
+    """
+    import pyrigi
+
+    rand = random.Random(seed)
+
+    p = (math.log(n) + 2 * math.log(math.log(n))) / n
+    while True:
+        graph = pyrigi.Graph(
+            nx.fast_gnp_random_graph(n, p, seed=rand.randint(0, 2**30))
+        )
+        if not nx.is_connected(graph):
+            continue
+        if len(nac.find_monochromatic_classes(graph)[1]) == 1:
+            continue
+        if not graph.is_rigid():
+            continue
+
+        return graph
+
+
+def _generate_threshold_globally_rigid_graph(
+    n: int,
+    seed: int | None,
+) -> nx.Graph:
+    """
+    Generates globally rigid graphs.
+
+    Uses bound from Theorem 4.4 from
+    The 2-Dimensional Rigidity of Certain Families of Graphs, 2006
+    Bill Jackson, Brigitte Servatius, and Herman Servatius
+    """
+    import pyrigi
+
+    rand = random.Random(seed)
+
+    p = (math.log(n) + 3 * math.log(math.log(n))) / n
     while True:
         graph = pyrigi.Graph(
             nx.fast_gnp_random_graph(n, p, seed=rand.randint(0, 2**30))

@@ -184,6 +184,9 @@ def load_no_3_nor_4_cycle_graphs() -> List[Graph]:
     return load_graph6_graphs_from_dir(os.path.join(DIR_STORE, "no_3_nor_4_cycles"))
 
 
+def load_globally_rigid_threshold_graphs() -> List[Graph]:
+    return load_graph6_graphs_from_dir(os.path.join(DIR_RANDOM, "globally_rigid_threshold"))
+
 def load_globally_rigid_nac_critical_graphs() -> List[Graph]:
     return load_graph6_graphs_from_dir(os.path.join(DIR_RANDOM, "globally_rigid_nac_critical"))
 
