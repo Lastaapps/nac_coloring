@@ -652,6 +652,7 @@ def replace_failed_results(
 
 DEFAULT_FIG_WIDTH = 398.33858
 LATEX_ENABLED = False
+CUM_SUM = False
 FIGURES_DIR = "figures"
 GOLDEN_RATIO = (5**0.5 - 1) / 2
 
@@ -788,6 +789,10 @@ def enable_latex_output():
         }
     )
 
+def set_cum_sum(enabled: bool = True):
+    global CUM_SUM
+    CUM_SUM = enabled
+
 def trcon(short: bool = False) -> str:
     if LATEX_ENABLED:
         base = r"$\triangle$"
@@ -869,12 +874,14 @@ def _group_and_plot(
     log_scale: bool,
     axs: List[plt.Axes],
     aggregations: List[Literal["mean", "median", "3rd quartile"]],
-    x_column: Literal["vertex_no", "monochromatic_classes_no"],
+    x_column: Literal["vertex_num", "monochromatic_classes_num"],
     based_on: Literal["relabel", "split", "merging"],
     value_columns: List[Literal["nac_first_mean_time", "nac_all_mean_time"]],
 ):
     # In case we are using only dummy values for a x-axes tick, we do not plot it
     is_using_dummy = NAC_DUMMY_MEAN_TIME_USED in df.columns
+
+    cumsum = df.reset_index()[["graph", x_column]].drop_duplicates().groupby([x_column]).count().cumsum()
 
     if is_using_dummy:
         df = df.loc[:, [x_column, based_on, *value_columns, NAC_DUMMY_MEAN_TIME_USED]]
@@ -883,6 +890,7 @@ def _group_and_plot(
     groupped = df.groupby([x_column, based_on])
 
     for ax, aggregation in zip(axs, aggregations):
+
         match aggregation:
             case "mean":
                 action = lambda x: x.mean()
@@ -908,6 +916,11 @@ def _group_and_plot(
                     ",".join([name, value_column]) if len(value_columns) > 1 else name
                 )
                 ax.plot(data.index, data[value_column], label=title)
+
+        if CUM_SUM:
+            ax_sum = ax.twinx()
+            ax_sum.fill_between(cumsum.index, cumsum.graph, label="cumulative number of graphs", color='gray', alpha=0.2, zorder=1)
+            ax_sum.axis('off')
 
         rename_based_on = {
             Columns.VERTEX_NUM: "Vertices",
@@ -964,7 +977,6 @@ def plot_frame(
     ],
     ops_x_column=[
         Columns.EXTENDED_CLASSES_NUM,
-        Columns.VERTEX_NUM,
     ],
     ops_based_on=[
         # Columns.RELABEL,
