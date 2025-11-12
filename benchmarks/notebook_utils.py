@@ -514,7 +514,7 @@ def nac_benchmark_core(
 def create_measurement_result(
     graph: nx.Graph,
     dataset_name: str,
-    trianlge_components: int,
+    triangle_components: int,
     extended_classes: int,
     nac_first: Optional[MeasuredRecord],
     nac_all: Optional[MeasuredRecord],
@@ -542,7 +542,7 @@ def create_measurement_result(
         dataset=dataset_name,
         vertex_num=vertex_no,
         edge_num=edge_no,
-        triangle_components_num=trianlge_components,
+        triangle_components_num=triangle_components,
         triangle_extended_classes_num=extended_classes,
         relabel=relabel_strategy,
         split=split_strategy,
