@@ -102,6 +102,7 @@ class Columns:
     USE_SMART_SPLIT = "use_smart_split"
     USED_EXTENDED_CLASSES = "used_extended_classes"
     ANY_FINISHED = "nac_any_finished"
+    ANY_TIMEOUT = "nac_any_timeout_milliseconds"
     FIRST_COLORING_NUM = "nac_first_coloring_num"
     FIRST_MEAN_TIME = "nac_first_mean_time"
     FIRST_ROUNDS = "nac_first_rounds"
@@ -116,6 +117,9 @@ class Columns:
     ALL_CHECKS = "nac_all_check_cycle_mask"
     ALL_MERGE = "nac_all_merge"
     ALL_MERGE_NO_COMMON_VERTEX = "nac_all_merge_no_common_vertex"
+
+    # For internal use
+    ANY_REPLACED_BY_TIMEOUT = "nac_any_replaced_by_timeout"
 
     first: list[str] = [FIRST_MEAN_TIME, FIRST_CHECKS]
     all: list[str] = [ALL_MEAN_TIME, ALL_CHECKS]
@@ -135,6 +139,7 @@ class Columns:
         USE_SMART_SPLIT,
         USED_EXTENDED_CLASSES,
         ANY_FINISHED,
+        ANY_TIMEOUT,
         FIRST_COLORING_NUM,
         FIRST_MEAN_TIME,
         FIRST_ROUNDS,
@@ -180,6 +185,7 @@ class MeasurementResult:
     use_smart_split: bool
     used_triangle_extended_classes: bool
     nac_any_finished: bool
+    nac_any_timeout_milliseconds: int
     nac_first_coloring_num: Optional[int]
     nac_first_mean_time: Optional[int]
     nac_first_rounds: Optional[int]
@@ -211,6 +217,7 @@ class MeasurementResult:
             self.use_smart_split,
             self.used_triangle_extended_classes,
             self.nac_any_finished,
+            self.nac_any_timeout_milliseconds,
             self.nac_first_coloring_num,
             self.nac_first_mean_time,
             self.nac_first_rounds,
@@ -435,6 +442,7 @@ def nac_benchmark_core(
     strategy: Tuple[str, str],
     use_triangle_extended_classes: bool,
     time_limit: int,
+    precise_rounds: bool,
     seed: int | None = 42,
 ) -> MeasuredData:
     """
@@ -498,14 +506,27 @@ def nac_benchmark_core(
             merge_no_common_vetex=nac.NAC_check_called()[3],
         )
 
-    def run() -> None:
-        [find_colorings() for _ in range(rounds)]
+    if precise_rounds:
+        for _ in range(rounds):
+            with_timeout(
+                find_colorings(),
+                time_limit=time_limit,
+                default=None,
+            )()
+        # Each round needs to finish
+        if result.first is not None and result.first.rounds != rounds:
+            result.first = None
+        if result.all is not None and result.all.rounds != rounds:
+            result.all = None
+    else:
+        def run() -> None:
+            [find_colorings() for _ in range(rounds)]
 
-    with_timeout(
-        run,
-        time_limit=time_limit * rounds,
-        default=None,
-    )()
+        with_timeout(
+            run,
+            time_limit=time_limit * rounds,
+            default=None,
+        )()
 
     return result
 
@@ -524,7 +545,8 @@ def create_measurement_result(
     subgraph_size: int,
     use_smart_split: bool,
     used_triangle_extended_classes: bool,
-    timestamp: datetime.datetime = datetime.datetime.now(datetime.UTC),
+    timeout_milliseconds: int,
+    timestamp: datetime.datetime | None = None,
 ) -> MeasurementResult:
     """
     Constructor for a MeasurementResult
@@ -535,6 +557,9 @@ def create_measurement_result(
     nac_any_finished = (nac_first or nac_all) is not None
     nac_first = nac_first or MeasuredRecord()
     nac_all = nac_all or MeasuredRecord()
+
+    if timestamp is None:
+        timestamp = datetime.datetime.now(datetime.UTC)
 
     return MeasurementResult(
         timestamp=timestamp,
@@ -551,6 +576,7 @@ def create_measurement_result(
         use_smart_split=use_smart_split,
         used_triangle_extended_classes=used_triangle_extended_classes,
         nac_any_finished=nac_any_finished,
+        nac_any_timeout_milliseconds=timeout_milliseconds,
         nac_first_coloring_num=nac_first.coloring_no,
         nac_first_mean_time=nac_first.mean_time,
         nac_first_rounds=nac_first.rounds,
@@ -613,31 +639,19 @@ def finished_graphs_no_naive(df: pd.DataFrame) -> pd.DataFrame:
 
 
 # Tries to preserve graphs that partially failed
-def replace_failed_results(
-    df: pd.DataFrame, replace_with: int | None = None
-) -> pd.DataFrame:
+def replace_failed_results(df: pd.DataFrame) -> pd.DataFrame:
     """
     Replaces failed runs with dummy data and marks such data for later processing
     """
-    # Chooses the expected time that was actually used
-    if replace_with is None:
-        max_runtime = df.query(f"{Columns.ANY_FINISHED} == True")[
-            [Columns.FIRST_MEAN_TIME, Columns.ALL_MEAN_TIME]
-        ].max(axis=None)
-        if max_runtime > 25_000:
-            replace_with = 5_000
-        else:
-            replace_with = ((max_runtime + 4_999) // 5_000) * 5_000
-
     df = df.copy()
     df_failed = df[Columns.ANY_FINISHED] == False
-    df[NAC_DUMMY_MEAN_TIME_USED] = False
-    df.loc[df_failed, NAC_DUMMY_MEAN_TIME_USED] = True
+    replace_with = df.loc[df_failed, Columns.ANY_TIMEOUT]
+    df.loc[~df_failed, Columns.ANY_REPLACED_BY_TIMEOUT] = False
+    df.loc[df_failed, Columns.ANY_REPLACED_BY_TIMEOUT] = True
     df.loc[df_failed, Columns.FIRST_MEAN_TIME] = replace_with
     df.loc[df_failed, Columns.ALL_MEAN_TIME] = replace_with
-    df.loc[df_failed, Columns.FIRST_CHECKS] = (
-        0  # these results will be automatically filtered out
-    )
+    # 0 check results are filtered out while plotting
+    df.loc[df_failed, Columns.FIRST_CHECKS] = 0
     df.loc[df_failed, Columns.ALL_CHECKS] = 0
     df.loc[df_failed, Columns.ANY_FINISHED] = True
     return df
@@ -847,8 +861,6 @@ def plot_extended_vs_original_triangle_components(df: pd.DataFrame, dataset: str
     return fig
 
 ###############################################################################
-NAC_DUMMY_MEAN_TIME_USED = "nac_dummy_mean_time_used"
-
 
 def _legend_order_key(label: str) -> int:
     label = label.lower()
@@ -879,12 +891,12 @@ def _group_and_plot(
     value_columns: List[Literal["nac_first_mean_time", "nac_all_mean_time"]],
 ):
     # In case we are using only dummy values for a x-axes tick, we do not plot it
-    is_using_dummy = NAC_DUMMY_MEAN_TIME_USED in df.columns
+    is_using_dummy = Columns.ANY_REPLACED_BY_TIMEOUT in df.columns
 
     cumsum = df.reset_index()[["graph", x_column]].drop_duplicates().groupby([x_column]).count().cumsum()
 
     if is_using_dummy:
-        df = df.loc[:, [x_column, based_on, *value_columns, NAC_DUMMY_MEAN_TIME_USED]]
+        df = df.loc[:, [x_column, based_on, *value_columns, Columns.ANY_REPLACED_BY_TIMEOUT]]
     else:
         df = df.loc[:, [x_column, based_on, *value_columns]]
     groupped = df.groupby([x_column, based_on])
@@ -900,7 +912,7 @@ def _group_and_plot(
                 action = lambda x: x.quantile(0.75)
         aggregated = groupped.agg(
             {col: action for col in value_columns}
-            | ({NAC_DUMMY_MEAN_TIME_USED: "all"} if is_using_dummy else {})
+            | ({Columns.ANY_REPLACED_BY_TIMEOUT: "all"} if is_using_dummy else {})
         )
 
         aggregated = aggregated.reorder_levels([based_on, x_column], axis=0)
@@ -908,7 +920,7 @@ def _group_and_plot(
         for name in aggregated.index.get_level_values(based_on).unique():
             data = aggregated.loc[name]
             if is_using_dummy:
-                data = data.query(f"{NAC_DUMMY_MEAN_TIME_USED} == False")
+                data = data.query(f"{Columns.ANY_REPLACED_BY_TIMEOUT} == False")
             if len(data) == 0:
                 continue
             for value_column in value_columns:
