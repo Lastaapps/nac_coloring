@@ -644,16 +644,16 @@ def replace_failed_results(df: pd.DataFrame) -> pd.DataFrame:
     Replaces failed runs with dummy data and marks such data for later processing
     """
     df = df.copy()
-    df_failed = df[Columns.ANY_FINISHED] == False
-    replace_with = df.loc[df_failed, Columns.ANY_TIMEOUT]
-    df.loc[~df_failed, Columns.ANY_REPLACED_BY_TIMEOUT] = False
-    df.loc[df_failed, Columns.ANY_REPLACED_BY_TIMEOUT] = True
-    df.loc[df_failed, Columns.FIRST_MEAN_TIME] = replace_with
-    df.loc[df_failed, Columns.ALL_MEAN_TIME] = replace_with
+    df_first_failed = df[Columns.ANY_FINISHED] == False
+    replace_with = df.loc[df_first_failed, Columns.ANY_TIMEOUT]
+    df.loc[~df_first_failed, Columns.ANY_REPLACED_BY_TIMEOUT] = False
+    df.loc[df_first_failed, Columns.ANY_REPLACED_BY_TIMEOUT] = True
+    df.loc[df_first_failed, Columns.FIRST_MEAN_TIME] = replace_with
+    df.loc[df_first_failed, Columns.ALL_MEAN_TIME] = replace_with
     # 0 check results are filtered out while plotting
-    df.loc[df_failed, Columns.FIRST_CHECKS] = 0
-    df.loc[df_failed, Columns.ALL_CHECKS] = 0
-    df.loc[df_failed, Columns.ANY_FINISHED] = True
+    df.loc[df_first_failed, Columns.FIRST_CHECKS] = 0
+    df.loc[df_first_failed, Columns.ALL_CHECKS] = 0
+    df.loc[df_first_failed, Columns.ANY_FINISHED] = True
     return df
 
 
