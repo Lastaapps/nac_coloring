@@ -442,7 +442,6 @@ def nac_benchmark_core(
     strategy: Tuple[str, str],
     use_triangle_extended_classes: bool,
     time_limit: int,
-    precise_rounds: bool,
     seed: int | None = 42,
 ) -> MeasuredData:
     """
@@ -506,7 +505,7 @@ def nac_benchmark_core(
             merge_no_common_vetex=nac.NAC_check_called()[3],
         )
 
-    if precise_rounds:
+    if PRECISE_ROUNDS:
         for _ in range(rounds):
             with_timeout(
                 find_colorings(),
@@ -667,8 +666,17 @@ def replace_failed_results(df: pd.DataFrame) -> pd.DataFrame:
 DEFAULT_FIG_WIDTH = 398.33858
 LATEX_ENABLED = False
 CUM_SUM = False
+PRECISE_ROUNDS = True
 FIGURES_DIR = "figures"
 GOLDEN_RATIO = (5**0.5 - 1) / 2
+
+def set_cum_sum(enabled: bool = True):
+    global CUM_SUM
+    CUM_SUM = enabled
+
+def set_precise_rounds(enabled: bool = False):
+    global PRECISE_ROUNDS
+    PRECISE_ROUNDS = enabled
 
 def fig_size(
     width: float = DEFAULT_FIG_WIDTH,
@@ -802,10 +810,6 @@ def enable_latex_output():
             # "ytick.labelsize": 6
         }
     )
-
-def set_cum_sum(enabled: bool = True):
-    global CUM_SUM
-    CUM_SUM = enabled
 
 def trcon(short: bool = False) -> str:
     if LATEX_ENABLED:
