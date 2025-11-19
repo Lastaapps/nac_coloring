@@ -16,7 +16,7 @@ from nac.util.repetable_iterator import RepeatableIterator
 from nac.data_type import NACColoring, Edge
 from nac.nac_valid_classes import (
     NACValidClassType,
-    find_monochromatic_classes,
+    find_nac_mono_classes,
     create_component_graph_from_components,
 )
 from nac.existence import has_NAC_coloring_checks, check_NAC_constrains

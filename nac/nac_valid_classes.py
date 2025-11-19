@@ -36,7 +36,7 @@ def _trivial_monochromatic_classes(
     return edge_to_component, component_to_edges
 
 
-def find_monochromatic_classes(
+def find_nac_mono_classes(
     graph: nx.Graph,
     class_type: NACValidClassType = NACValidClassType.EXTENDED,
     is_cartesian_NAC_coloring: bool = False,

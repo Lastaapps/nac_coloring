@@ -35,7 +35,7 @@ from nac.util.repetable_iterator import RepeatableIterator
 from nac.data_type import NACColoring, Edge, NiceGraph
 from nac.nac_valid_classes import (
     NACValidClassType,
-    find_monochromatic_classes,
+    find_nac_mono_classes,
     create_component_graph_from_components,
 )
 from nac.existence import has_NAC_coloring_checks, check_NAC_constrains
@@ -176,7 +176,7 @@ def _NAC_colorings_with_trivial_stable_cuts(
     processor: Callable[[nx.Graph], Iterable[NACColoring]],
     copy: bool = True,
 ) -> Iterable[NACColoring]:
-    _, component_to_edge = find_monochromatic_classes(
+    _, component_to_edge = find_nac_mono_classes(
         graph,
         is_cartesian_NAC_coloring=False,
     )
@@ -346,7 +346,7 @@ def NAC_colorings_impl(
         if graph.number_of_edges() == 0:
             return []
 
-        edge_to_component, component_to_edge = find_monochromatic_classes(
+        edge_to_component, component_to_edge = find_nac_mono_classes(
             graph,
             monochromatic_class_type,
             is_cartesian_NAC_coloring=is_cartesian,

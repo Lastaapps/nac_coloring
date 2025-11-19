@@ -32,7 +32,7 @@ DIR_LAMAN_RANDOM = os.path.join(DIR_RANDOM, "minimally_rigid")
 ################################################################################
 def _filter_triangle_only_graphs(graphs) -> filter:
     return filter(
-        lambda g: len(nac.find_monochromatic_classes(g)[1]) > 1,
+        lambda g: len(nac.find_nac_mono_classes(g)[1]) > 1,
         graphs,
     )
 

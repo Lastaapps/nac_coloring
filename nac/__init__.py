@@ -5,7 +5,7 @@ Module related to the NAC coloring search
 from nac.data_type import *
 from nac.nac_valid_classes import (
     NACValidClassType,
-    find_monochromatic_classes,
+    find_nac_mono_classes,
     create_component_graph_from_components,
 )
 from nac.entry import *

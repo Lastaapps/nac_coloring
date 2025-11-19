@@ -105,6 +105,27 @@ def generate_random_minimally_rigid_graphs(
     )
 
 
+def generate_random_nac_critical_graphs(
+    dir: str = os.path.join(datasets.DIR_RANDOM, "nac_critical"),
+    filename_template: str = "nac_critical_{0}",
+    seed: int | None = 42,
+) -> List[Tuple[int, List[nx.Graph]]]:
+    ranges = (
+        RangeWithCount(10, 20, 500),
+        RangeWithCount(20, 30, 500),
+        RangeWithCount(30, 40, 500),
+        RangeWithCount(40, 50, 500),
+        RangeWithCount(50, 60, 500),
+    )
+    return _generate_random_graphs_impl(
+        ranges,
+        lambda n, seed: _generate_NAC_critical_graph(n, seed),
+        dir,
+        filename_template,
+        seed,
+    )
+
+
 def generate_random_globally_rigid_nac_critical_graphs(
     dir: str = os.path.join(datasets.DIR_RANDOM, "globally_rigid_nac_critical"),
     filename_template: str = "globally_rigid_nac_critical_{0}",
@@ -172,7 +193,7 @@ def _generate_minimally_rigid(
             continue
         if not graph.is_min_rigid():
             continue
-        if len(nac.find_monochromatic_classes(graph)[1]) == 1:
+        if len(nac.find_nac_mono_classes(graph)[1]) == 1:
             continue
 
         return graph
@@ -193,7 +214,7 @@ def _generate_NAC_critical_graph(
     """
     rand = random.Random(seed)
 
-    p = 0.95 * (2 * math.log(n, log_base) / (n * n)) ** (1 / 3)
+    p = (2 * math.log(n, log_base) / (n * n)) ** (1 / 3)
 
     while True:
         graph = Graph(nx.fast_gnp_random_graph(n, p, seed=rand.randint(0, 2**30)))
@@ -227,7 +248,7 @@ def _generate_NAC_critical_globally_rigid_graph(
         )
         if not nx.is_connected(graph):
             continue
-        if len(nac.find_monochromatic_classes(graph)[1]) == 1:
+        if len(nac.find_nac_mono_classes(graph)[1]) == 1:
             continue
         if not graph.is_globally_rigid():
             continue
@@ -258,7 +279,7 @@ def _generate_threshold_rigid_graph(
         )
         if not nx.is_connected(graph):
             continue
-        if len(nac.find_monochromatic_classes(graph)[1]) == 1:
+        if len(nac.find_nac_mono_classes(graph)[1]) == 1:
             continue
         if not graph.is_rigid():
             continue
@@ -288,7 +309,7 @@ def _generate_threshold_globally_rigid_graph(
         )
         if not nx.is_connected(graph):
             continue
-        if len(nac.find_monochromatic_classes(graph)[1]) == 1:
+        if len(nac.find_nac_mono_classes(graph)[1]) == 1:
             continue
         if not graph.is_globally_rigid():
             continue

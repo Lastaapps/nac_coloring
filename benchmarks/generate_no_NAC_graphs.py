@@ -125,7 +125,7 @@ def search_large_graph_no_NAC_coloring(
         graph = nx.gnm_random_graph(n, m, seed=rand.randint(0, 2**30))
         if not nx.is_connected(graph):
             continue
-        classes_no = nac.find_monochromatic_classes(
+        classes_no = nac.find_nac_mono_classes(
             graph,
             # class_type=MonochromaticClassType.MONOCHROMATIC,
             class_type=NACValidClassType.TRIANGLES,

@@ -7,7 +7,7 @@ from typing import *
 import networkx as nx
 
 from nac.data_type import NACColoring, LoopError
-from nac.nac_valid_classes import find_monochromatic_classes
+from nac.nac_valid_classes import find_nac_mono_classes
 
 
 def check_NAC_constrains(self: nx.Graph) -> bool:
@@ -91,7 +91,7 @@ def _check_for_simple_stable_cut(
         (not None) if certificate is not needed (False)
         or the found coloring if it is requested (True).
     """
-    _, component_to_edge = find_monochromatic_classes(graph)
+    _, component_to_edge = find_nac_mono_classes(graph)
     verticies_outside_triangle_components: Set[int] = set(
         # make sure we filter out isolated vertices
         u
