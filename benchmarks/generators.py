@@ -160,6 +160,12 @@ def generate_threshold_globally_rigid_graphs(
         RangeWithCount(50, 60, 100),
         RangeWithCount(60, 70, 100),
         RangeWithCount(70, 80, 100),
+        RangeWithCount(80, 90, 100),
+        RangeWithCount(90, 100, 100),
+        RangeWithCount(100, 110, 100),
+        RangeWithCount(110, 120, 100),
+        RangeWithCount(120, 130, 100),
+        RangeWithCount(130, 140, 100),
     )
     return _generate_random_graphs_impl(
         ranges,
