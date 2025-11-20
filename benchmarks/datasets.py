@@ -195,6 +195,10 @@ def load_no_NAC_coloring_graphs_gathered() -> List[Graph]:
     return load_graph6_graphs_from_file(os.path.join(DIR_EXTRACTED, "no_nac_coloring"))
 
 
+def load_nac_critical_graphs(precision: float) -> List[Graph]:
+    return load_graph6_graphs_from_dir(os.path.join(DIR_RANDOM, f"nac_critical_{precision:.2f}"))
+
+
 def load_no_NAC_coloring_graphs_generated(
     start: int, length: int = 10, seed: int | None = 42
 ) -> List[Graph]:
