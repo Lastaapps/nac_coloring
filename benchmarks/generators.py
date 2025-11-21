@@ -14,7 +14,8 @@ from tqdm import tqdm
 
 import nac
 from benchmarks import datasets
-from nac import NiceGraph as Graph, NACValidClassType
+from nac import NACValidClassType
+from nac import NiceGraph as Graph
 
 
 class RangeWithCount(NamedTuple):
@@ -111,13 +112,15 @@ def generate_random_nac_critical_graphs(
     seed: int | None = 42,
 ) -> List[Tuple[int, List[nx.Graph]]]:
     ranges = (
-        RangeWithCount(10, 20, 250),
-        RangeWithCount(20, 30, 250),
-        RangeWithCount(30, 40, 250),
-        RangeWithCount(40, 50, 250),
-        RangeWithCount(50, 60, 250),
-        RangeWithCount(60, 70, 250),
+        RangeWithCount(30, 40, 200),
+        RangeWithCount(40, 50, 200),
+        RangeWithCount(50, 60, 200),
+        RangeWithCount(60, 70, 200),
+        RangeWithCount(70, 80, 200),
+        RangeWithCount(80, 90, 200),
+        RangeWithCount(90, 100, 200),
     )
+
     return _generate_random_graphs_impl(
         ranges,
         lambda n, seed: _generate_NAC_critical_graph(n, seed),
@@ -227,7 +230,10 @@ def _generate_NAC_critical_graph(
         graph = Graph(nx.fast_gnp_random_graph(n, p, seed=rand.randint(0, 2**30)))
         if not nx.is_connected(graph):
             continue
-        if len(nac.find_nac_mono_classes(graph, NACValidClassType.TRIANGLES)[1]) < n // 4:
+        if (
+            len(nac.find_nac_mono_classes(graph, NACValidClassType.TRIANGLES)[1])
+            < n // 4
+        ):
             continue
 
         return graph
