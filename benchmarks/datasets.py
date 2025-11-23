@@ -11,6 +11,7 @@ import random
 import re
 import networkx as nx
 from typing import *
+from pathlib import Path
 
 import networkx as nx
 import nac
@@ -151,6 +152,7 @@ def load_graph6_graphs_from_dir(
 
         graphs += load_graph6_graphs_from_file(path)
 
+    graphs.sort(key=lambda x: x.number_of_nodes())
     return graphs
 
 
@@ -195,8 +197,8 @@ def load_no_NAC_coloring_graphs_gathered() -> List[Graph]:
     return load_graph6_graphs_from_file(os.path.join(DIR_EXTRACTED, "no_nac_coloring"))
 
 
-def load_nac_critical_graphs(precision: float) -> List[Graph]:
-    return load_graph6_graphs_from_dir(os.path.join(DIR_RANDOM, f"nac_critical_{precision:.2f}"))
+def load_nac_critical_graphs() -> List[Graph]:
+    return load_graph6_graphs_from_dir(os.path.join(DIR_RANDOM, f"nac_critical"))
 
 
 def load_no_NAC_coloring_graphs_generated(
