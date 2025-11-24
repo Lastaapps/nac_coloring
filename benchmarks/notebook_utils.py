@@ -439,7 +439,8 @@ def nac_benchmark_core(
     graph: nx.Graph,
     rounds: int,
     first_only: bool,
-    strategy: Tuple[str, str],
+    relabel_strategy: str,
+    algorithm: str,
     use_triangle_extended_classes: bool,
     time_limit: int,
     seed: int | None = 42,
@@ -463,8 +464,8 @@ def nac_benchmark_core(
         itr = iter(
             nac.NAC_colorings(
                 graph=graph,
-                algorithm=strategy[1],
-                relabel_strategy=strategy[0],
+                algorithm=algorithm,
+                relabel_strategy=relabel_strategy,
                 nac_valid_class_type=nac_valid_class_type,
                 seed=rand.randint(0, 2**30),
             )
@@ -508,7 +509,7 @@ def nac_benchmark_core(
     if PRECISE_ROUNDS:
         for _ in range(rounds):
             with_timeout(
-                find_colorings(),
+                find_colorings,
                 time_limit=time_limit,
                 default=None,
             )()
