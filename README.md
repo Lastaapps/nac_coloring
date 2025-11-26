@@ -78,6 +78,12 @@ using the threshold function from https://doi.org/10.1002/jgt.20196.
 These were generated randomly and only graphs with significant number of
 triangle connected components were kept (we did not find graphs with more monochromatic classes).
 
+### NAC-critical graphs
+
+These were generated randomly using the threshold function for NAC-coloring existence from
+[paper](https://arxiv.org/abs/2510.05838) *Sharp thresholds for NAC-colourings and stable cuts in random graphs*.
+For each vertex number, only graphs with at least |V(G)|/4 triangle components were kept.
+
 ## License
 
 The code is licensed under MIT license.
