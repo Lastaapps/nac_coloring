@@ -59,24 +59,10 @@ For benchmarks, larger minimally rigid graphs were generated randomly as Nauty g
 that are quite similar.
 Random minimally rigid graphs are stored in the `./random/minimally_rigid` folder.
 
-### No 3 nor 4 cycles
-
-The class of graphs that have no 3 nor 4 cycles was obtained from
-[users.cecs.anu.edu.au (external)](https://users.cecs.anu.edu.au/~bdm/data/extremal.html).
-
-For previous testing we also used some graph classes from
-[users.cecs.anu.edu.au](https://users.cecs.anu.edu.au/~bdm/data/graphs.html).
-Unfortunately these were not as interesting as not large enough graphs were available.
-
 ### Globally rigid graphs
 
 Globally rigid graphs were generated randomly
 using the threshold function from https://doi.org/10.1002/jgt.20196.
-
-### Graphs with no NAC-coloring
-
-These were generated randomly and only graphs with significant number of
-triangle connected components were kept (we did not find graphs with more monochromatic classes).
 
 ### NAC-critical graphs
 
