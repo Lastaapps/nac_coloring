@@ -130,27 +130,6 @@ def generate_random_nac_critical_graphs(
     )
 
 
-def generate_random_globally_rigid_nac_critical_graphs(
-    dir: str = os.path.join(datasets.DIR_RANDOM, "globally_rigid_nac_critical"),
-    filename_template: str = "globally_rigid_nac_critical_{0}",
-    seed: int | None = 42,
-) -> List[Tuple[int, List[nx.Graph]]]:
-    ranges = (
-        RangeWithCount(10, 20, 100),
-        RangeWithCount(20, 30, 100),
-        RangeWithCount(30, 40, 100),
-        RangeWithCount(40, 50, 100),
-        RangeWithCount(50, 60, 100),
-    )
-    return _generate_random_graphs_impl(
-        ranges,
-        lambda n, seed: _generate_NAC_critical_globally_rigid_graph(n, seed),
-        dir,
-        filename_template,
-        seed,
-    )
-
-
 def generate_threshold_globally_rigid_graphs(
     dir: str = os.path.join(datasets.DIR_RANDOM, "globally_rigid_threshold"),
     filename_template: str = "globally_rigid_threshold_{0}",
@@ -234,38 +213,6 @@ def _generate_NAC_critical_graph(
             len(nac.find_nac_mono_classes(graph, NACValidClassType.TRIANGLES)[1])
             < n // 4
         ):
-            continue
-
-        return graph
-
-
-def _generate_NAC_critical_globally_rigid_graph(
-    n: int,
-    seed: int | None,
-    log_base: float = math.e,
-) -> nx.Graph:
-    """
-    Generates graphs that should have likely few NAC colorings
-    or no NAC colorings what so ever and are globally rigid.
-
-    Uses bound for NAC-critical graphs provided by paper
-    Sharp thresholds for NAC-colourings and stable cuts in random graphs, 2025,
-    Katie Clinch, John Haslegrave, Tony Huynh, Anthony Nixon
-    """
-    import pyrigi
-
-    rand = random.Random(seed)
-
-    p = (2 * math.log(n, log_base) / (n * n)) ** (1 / 3)
-    while True:
-        graph = pyrigi.Graph(
-            nx.fast_gnp_random_graph(n, p, seed=rand.randint(0, 2**30))
-        )
-        if not nx.is_connected(graph):
-            continue
-        if len(nac.find_nac_mono_classes(graph)[1]) == 1:
-            continue
-        if not graph.is_globally_rigid():
             continue
 
         return graph

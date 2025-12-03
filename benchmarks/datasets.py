@@ -19,14 +19,9 @@ from nac import NiceGraph as Graph
 
 DIR_STORE = os.path.join("graphs_store")
 DIR_RANDOM = os.path.join(DIR_STORE, "random")
-DIR_EXTRACTED = os.path.join(DIR_STORE, "extracted")
-DIR_NO_NAC = os.path.join(DIR_RANDOM, "no_NAC_coloring")
 
 DIR_LAMAN_NAUTY = os.path.join(DIR_STORE, "nauty")
 DIR_LAMAN = os.path.join(DIR_LAMAN_NAUTY, "minimally_rigid_some")
-DIR_LAMAN_DEGREE_3_PLUS = os.path.join(
-    DIR_LAMAN_NAUTY, "minimally_rigid_some_degree_3_plus"
-)
 DIR_LAMAN_RANDOM = os.path.join(DIR_RANDOM, "minimally_rigid")
 
 
@@ -68,14 +63,8 @@ def load_minimally_rigid_random_graphs(shuffle: bool = True) -> Iterable[Graph]:
     return load_minimally_rigid(dir=DIR_LAMAN_RANDOM, shuffle=shuffle)
 
 
-def load_minimally_rigid_degree_3_plus(shuffle: bool = True) -> Iterable[Graph]:
-    return load_minimally_rigid(dir=DIR_LAMAN_DEGREE_3_PLUS, shuffle=shuffle)
-
-
 LAMAN_ALL_DIR = os.path.join(DIR_LAMAN_NAUTY, "minimally_rigid_all")
 LAMAN_ALL_FILENAME = "minimally_rigid_{}.g6"
-LAMAN_DEGREE_3_PLUS_ALL_DIR = os.path.join(DIR_STORE, "minimally_rigid_degree_3_plus")
-LAMAN_DEGREE_3_PLUS_ALL_FILENAME = "D3LamanGraphs{}.m"
 
 
 def load_minimally_rigid_all(
@@ -95,30 +84,6 @@ def load_minimally_rigid_all(
                 continue
             g = nx.from_graph6_bytes(line.__bytes__())
             yield Graph(g)
-
-
-def load_minimally_rigid_degree_3_plus_all(
-    vertices_no: int, limit: int | None = None
-) -> Iterable[nx.Graph]:
-    import pyrigi
-
-    path = os.path.join(
-        LAMAN_DEGREE_3_PLUS_ALL_DIR,
-        LAMAN_DEGREE_3_PLUS_ALL_FILENAME.format(vertices_no),
-    )
-
-    graph_no = 0
-    if limit == None:
-        limit = -1  # Will never end
-
-    with open(path) as file:
-        for line in file:
-            for integer in re.finditer("(\\d+)", line):
-                yield pyrigi.Graph.from_int(int(integer.group()))
-
-                graph_no += 1
-                if graph_no == limit:
-                    return
 
 
 def _convert_g6_to_int(from_path: str, to_path: str):
@@ -182,32 +147,9 @@ def load_graph6_graphs_from_file(
 
 
 ################################################################################
-def load_no_3_nor_4_cycle_graphs() -> List[Graph]:
-    return load_graph6_graphs_from_dir(os.path.join(DIR_STORE, "no_3_nor_4_cycles"))
-
-
 def load_globally_rigid_threshold_graphs() -> List[Graph]:
     return load_graph6_graphs_from_dir(os.path.join(DIR_RANDOM, "globally_rigid_threshold"))
-
-def load_globally_rigid_nac_critical_graphs() -> List[Graph]:
-    return load_graph6_graphs_from_dir(os.path.join(DIR_RANDOM, "globally_rigid_nac_critical"))
-
-
-def load_no_NAC_coloring_graphs_gathered() -> List[Graph]:
-    return load_graph6_graphs_from_file(os.path.join(DIR_EXTRACTED, "no_nac_coloring"))
 
 
 def load_nac_critical_graphs() -> List[Graph]:
     return load_graph6_graphs_from_dir(os.path.join(DIR_RANDOM, f"nac_critical"))
-
-
-def load_no_NAC_coloring_graphs_generated(
-    start: int, length: int = 10, seed: int | None = 42
-) -> List[Graph]:
-    graphs: List[Graph] = []
-    for i in range(start, start + length):
-        graphs += load_graph6_graphs_from_file(
-            os.path.join(DIR_NO_NAC, f"no_NAC_coloring-{i}-TRIANGLES.g6")
-        )
-    random.Random(seed).shuffle(graphs)
-    return graphs[:1000]
