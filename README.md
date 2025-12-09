@@ -2,7 +2,7 @@
 
 *Petr Laštovička and Jan Legerský*
 
-![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17594025.svg)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17594025.svg)](https://doi.org/10.5281/zenodo.17594025)
 
 In this repository, we provide our code for the NAC-coloring search algorithm
 described in the [paper](https://www.arxiv.org/abs/2412.13721)
@@ -26,16 +26,13 @@ pip install -r requirements.txt
 ## Tests
 
 You can run the tests by executing `pytest`.
-The packages also contains base for Cartesian NAC-coloring search,
-the related tests are skipped for now as it is not yet fully implemented
-for every approach.
 
 ## Structure
 
 - `nac` - the implementation of our NAC-coloring related algorithms and heuristics
 - `stablecut` - the implementation of an algorithm to search for stable cuts
 - `benchmarks` - utility files related to benchmarks - graphs loading, generation, analysis notebook utility functions
-- `benchmarks/precomputed` - Results of the benchmarks as run on our hardware
+- `benchmarks/precomputed` - results of the benchmarks as run on our hardware
 - `graphs_store` - stores generated graphs of selected classes
 
 ## Graphs dataset
@@ -44,11 +41,10 @@ We list sources of the graph classes and generation tools used
 to create graph datasets of specific graph classes.
 Benchmarks later use these graphs to perform algorithms comparison.
 All the graphs are stored in the `graphs_store` directory.
-For proper description, see the thesis.
 
 ### Minimally rigid graphs
 
-We listed all minimally rigid graphs
+We listed all minimally rigid graphs (up to 11 vertices)
 using [Nauty](https://pallini.di.uniroma1.it/)
 with [nauty-laman-plugin](https://github.com/martinkjlarsson/nauty-laman-plugin).
 
