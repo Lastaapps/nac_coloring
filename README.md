@@ -1,4 +1,4 @@
-# Flexible realizations existence: NP-completeness on sparse graphs and algorithms
+# Algorithms for NAC-coloring search - implementation and benchmarks
 
 *Petr Laštovička and Jan Legerský*
 
@@ -58,12 +58,12 @@ Random minimally rigid graphs are stored in the `./random/minimally_rigid` folde
 ### Globally rigid graphs
 
 Globally rigid graphs were generated randomly
-using the threshold function from https://doi.org/10.1002/jgt.20196.
+using the threshold function from the [paper](https://doi.org/10.1002/jgt.20196) *The 2-dimensional rigidity of certain families of graphs* by Bill Jackson, Brigitte Servatius and  Herman Servatius.
 
 ### NAC-critical graphs
 
 These were generated randomly using the threshold function for NAC-coloring existence from
-[paper](https://arxiv.org/abs/2510.05838) *Sharp thresholds for NAC-colourings and stable cuts in random graphs*.
+[paper](https://arxiv.org/abs/2510.05838) *Sharp thresholds for NAC-colourings and stable cuts in random graphs* by Katie Clinch, John Haslegrave, Tony Huynh and Anthony Nixon.
 For each vertex number, only graphs with at least |V(G)|/4 triangle components were kept.
 
 ## License
